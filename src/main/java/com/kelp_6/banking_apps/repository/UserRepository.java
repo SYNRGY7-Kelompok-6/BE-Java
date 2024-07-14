@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +14,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Modifying
     @Query(value = "delete from users", nativeQuery = true)
     void hardDeleteAll();
+
+    Optional<User> findByUsername(String username);
+
+    boolean existsByUsername(String username);
 }

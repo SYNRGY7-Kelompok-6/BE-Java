@@ -47,7 +47,7 @@ public class DatabaseSeeder {
         for(int i=0; i<numUsers; i++){
             User user = User.builder()
                     .name("Test " + i)
-                    .email("test" + i + "@test.com")
+                    .username("test" + i + "@test.com")
                     .password(passwordEncoder.encode(String.format("Password_%d", i)))
                     .isVerified(true)
                     .build();
@@ -91,7 +91,7 @@ public class DatabaseSeeder {
                     .amount(10000D)
                     .currency("IDR")
                     .beneficiaryAccountNumber(opposite.getAccount().getAccountNumber())
-                    .beneficiaryEmail(opposite.getEmail())
+                    .beneficiaryEmail(opposite.getUsername())
                     .type(ETransactionType.CREDIT)
                     .remark("dummy transfer")
                     .account(owner.getAccount())
@@ -101,7 +101,7 @@ public class DatabaseSeeder {
                     .amount(10000D)
                     .currency("IDR")
                     .beneficiaryAccountNumber(owner.getAccount().getAccountNumber())
-                    .beneficiaryEmail(owner.getEmail())
+                    .beneficiaryEmail(owner.getUsername())
                     .type(ETransactionType.DEBIT)
                     .remark("dummy transfer")
                     .account(opposite.getAccount())
