@@ -32,13 +32,6 @@ public class User extends BaseEntity{
     @Column(nullable = false)
     private boolean isVerified;
 
-    @Column(nullable = false, unique = true)
-    private String accountNumber; // filled with 10 digit unique number
-
-    @Column(nullable = false)
-    private Long balance;
-
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL})
-    private List<Transaction> transactions;
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Account account;
 }

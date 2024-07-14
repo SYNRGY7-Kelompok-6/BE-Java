@@ -1,18 +1,16 @@
 package com.kelp_6.banking_apps.repository;
 
-import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface AccountRepository extends JpaRepository<Account, UUID> {
     @Modifying
-    @Query(value = "delete from users", nativeQuery = true)
+    @Query(value = "delete from accounts", nativeQuery = true)
     void hardDeleteAll();
 }

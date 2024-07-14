@@ -1,8 +1,10 @@
 package com.kelp_6.banking_apps.setup;
 
+import com.kelp_6.banking_apps.entity.Account;
 import com.kelp_6.banking_apps.entity.ETransactionType;
 import com.kelp_6.banking_apps.entity.Transaction;
 import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.Generator;
@@ -12,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -28,9 +27,13 @@ public class DatabaseSeeder {
     @Autowired
     private final TransactionRepository transactionRepository;
 
+    @Autowired
+    private final AccountRepository accountRepository;
+
     @Transactional
     public void setup(){
         transactionRepository.hardDeleteAll();
+        accountRepository.hardDeleteAll();
         userRepository.hardDeleteAll();
 
         // SEED USERS
@@ -38,25 +41,36 @@ public class DatabaseSeeder {
         List<User> listUsers = new ArrayList<>();
 
         for(int i=0; i<numUsers; i++){
-//            User user = new User();
-//            user.setName("Test " + i);
-//            user.setEmail("test" + i + "@test.com");
-//            user.setPassword("withoutencoder" + i);
             User user = User.builder()
                     .name("Test " + i)
                     .email("test" + i + "@test.com")
                     .password("withoutencoder" + i)
                     .isVerified(true)
-                    .accountNumber(Generator.tenDigitNumberGenerator())
-                    .balance(100000L)
                     .build();
 
             listUsers.add(user);
         }
 
-        userRepository.saveAllAndFlush(listUsers);
+        userRepository.saveAll(listUsers);
 
         log.info("[SUCCESS] Seeds {} records to users table", listUsers.size());
+
+        // SEED ACCOUNT
+        int numAccount = listUsers.size();
+        List<Account> listAccounts = new ArrayList<>();
+
+        for(int i=0; i<numAccount; i++){
+            Account account = Account.builder()
+                    .accountNumber(Generator.tenDigitNumberGenerator())
+                    .availableBalance(100000D)
+                    .currency("IDR")
+                    .user(listUsers.get(i))
+                    .build();
+            listUsers.get(i).setAccount(account);
+            listAccounts.add(account);
+        }
+
+        accountRepository.saveAll(listAccounts);
 
         // SEED TRANSACTION
         int numTransactions = 2;
@@ -70,26 +84,30 @@ public class DatabaseSeeder {
             User opposite = listUsers.get(oppositeUser.get(i));
 
             Transaction creditTransaction = Transaction.builder()
-                    .amount(10000L)
-                    .description("dummy transfer")
+                    .amount(10000D)
+                    .currency("IDR")
+                    .beneficiaryAccountNumber(opposite.getAccount().getAccountNumber())
+                    .beneficiaryEmail(opposite.getEmail())
                     .type(ETransactionType.CREDIT)
-                    .oppositeAccNumber(opposite.getAccountNumber())
-                    .user(owner)
+                    .remark("dummy transfer")
+                    .account(owner.getAccount())
                     .build();
 
             Transaction debitTransaction = Transaction.builder()
-                    .amount(10000L)
-                    .description("dummy transfer")
+                    .amount(10000D)
+                    .currency("IDR")
+                    .beneficiaryAccountNumber(owner.getAccount().getAccountNumber())
+                    .beneficiaryEmail(owner.getEmail())
                     .type(ETransactionType.DEBIT)
-                    .oppositeAccNumber(owner.getAccountNumber())
-                    .user(opposite)
+                    .remark("dummy transfer")
+                    .account(opposite.getAccount())
                     .build();
 
             listTransactions.add(creditTransaction);
             listTransactions.add(debitTransaction);
         }
 
-        transactionRepository.saveAllAndFlush(listTransactions);
+        transactionRepository.saveAll(listTransactions);
 
         log.info("[SUCCESS] Seeds {} records to transactions table", listTransactions.size());
     }

@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -23,21 +25,31 @@ public class Transaction extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private String oppositeAccNumber;
+    @Column(nullable = false, name = "beneficiary_account_number")
+    private String beneficiaryAccountNumber;
+
+    @Column(nullable = false, name = "beneficiary_email")
+    private String beneficiaryEmail;
 
     @Column(nullable = false)
-    private Long amount;
+    private Double amount;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ETransactionType type;
 
-    private String description;
+    private String remark;
+
+    @Column(nullable = false)
+    private String currency;
+
+    @Column(nullable = false, updatable = false, name = "transaction_date")
+    @CreationTimestamp
+    private Date transactionDate;
 
     @ManyToOne
-    @JoinColumn(name = "owner_acc_num", referencedColumnName = "accountNumber")
-    private User user;
+    @JoinColumn(name = "source_account_number", referencedColumnName = "account_number")
+    private Account account;
     // with assumption when perform transaction should create 2 new records
     // with 2 diff transaction type and owner (sender-credit, recipient-debit)
 }
