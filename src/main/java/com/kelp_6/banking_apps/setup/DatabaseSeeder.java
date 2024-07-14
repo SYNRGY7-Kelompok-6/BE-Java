@@ -11,6 +11,8 @@ import com.kelp_6.banking_apps.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +42,13 @@ public class DatabaseSeeder {
         int numUsers = 2;
         List<User> listUsers = new ArrayList<>();
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         for(int i=0; i<numUsers; i++){
             User user = User.builder()
                     .name("Test " + i)
                     .email("test" + i + "@test.com")
-                    .password("withoutencoder" + i)
+                    .password(passwordEncoder.encode(String.format("Password_%d", i)))
                     .isVerified(true)
                     .build();
 
@@ -59,14 +63,14 @@ public class DatabaseSeeder {
         int numAccount = listUsers.size();
         List<Account> listAccounts = new ArrayList<>();
 
-        for(int i=0; i<numAccount; i++){
+        for (User listUser : listUsers) {
             Account account = Account.builder()
                     .accountNumber(Generator.tenDigitNumberGenerator())
                     .availableBalance(100000D)
                     .currency("IDR")
-                    .user(listUsers.get(i))
+                    .user(listUser)
                     .build();
-            listUsers.get(i).setAccount(account);
+            listUser.setAccount(account);
             listAccounts.add(account);
         }
 
@@ -77,7 +81,7 @@ public class DatabaseSeeder {
         List<Transaction> listTransactions = new ArrayList<>();
         Map<Integer, Integer> oppositeUser = new HashMap<>();
         oppositeUser.put(0, 1);
-        oppositeUser.put(1,0);
+        oppositeUser.put(1, 0);
 
         for(int i=0; i<numTransactions; i++){
             User owner = listUsers.get(i);
