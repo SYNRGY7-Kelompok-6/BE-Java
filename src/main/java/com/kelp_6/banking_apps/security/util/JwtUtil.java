@@ -16,7 +16,8 @@ public class JwtUtil {
     @Value("${security.jwt.secret-key}")
     private String SECRET_KEY;
 
-    private final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
+    @Value("${security.jwt.expired-milliseconds}")
+    private long EXPIRATION_TIME; // 1 day in milliseconds
 
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 

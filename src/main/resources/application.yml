@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: banking-apps
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+server:
+  port: 8080
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    expired-milliseconds: ${JWT_EXPIRED_MILLISECONDS}
