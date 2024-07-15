@@ -42,18 +42,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> getUserByUsername(@RequestParam("username") String username,
-                                                                 @RequestParam("pin") String pin) {
-        try {
-            System.out.println("Username: " + username);
-            System.out.println("PIN: " + pin);
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest loginRequest) {
+        String email = loginRequest.getEmail();
+        String password = loginRequest.getPassword();
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (!passwordEncoder.matches(pin, userDetails.getPassword())) {
-                throw new IncorrectPinException("Incorrect PIN for username: " + username);
+        // Sisanya tetap sama seperti yang Anda miliki dalam metode sebelumnya
+        try {
+            System.out.println("Email: " + email);
+            System.out.println("Password: " + password);
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+                throw new IncorrectPinException("Incorrect password for email: " + email);
             }
 
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, pin));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
             String token = jwtUtil.generateToken(userDetails);
             return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", token));
         } catch (UserNotFoundException e) {
@@ -61,24 +64,30 @@ public class AuthController {
         } catch (IncorrectPinException e) {
             return ResponseEntity.status(401).body(new ApiResponse<>(false, e.getMessage()));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(401).body(new ApiResponse<>(false, "Invalid username or pin"));
+            return ResponseEntity.status(401).body(new ApiResponse<>(false, "Invalid email or password"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse<>(false, "An error occurred: " + e.getMessage()));
         }
     }
 
-    @PostMapping("/register") // sementara
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout() {
+        return ResponseEntity.ok(new ApiResponse<>(true, "Logout successful"));
+    }
+
+    @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> registerUser(@RequestBody User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Username is already taken!"));
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, "Email is already taken!"));
         }
-        String encodedPin = passwordEncoder.encode(user.getPin());
-        user.setPin(encodedPin);
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
         User savedUser = userRepository.save(user);
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                savedUser.getUsername(),
-                savedUser.getPin(),
+                savedUser.getEmail(),
+                savedUser.getPassword(),
                 Collections.emptyList()
         );
         String token = jwtUtil.generateToken(userDetails);
