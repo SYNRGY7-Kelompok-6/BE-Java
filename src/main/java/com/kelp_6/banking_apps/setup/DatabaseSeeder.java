@@ -1,12 +1,7 @@
 package com.kelp_6.banking_apps.setup;
 
-import com.kelp_6.banking_apps.entity.Account;
-import com.kelp_6.banking_apps.entity.ETransactionType;
-import com.kelp_6.banking_apps.entity.Transaction;
-import com.kelp_6.banking_apps.entity.User;
-import com.kelp_6.banking_apps.repository.AccountRepository;
-import com.kelp_6.banking_apps.repository.TransactionRepository;
-import com.kelp_6.banking_apps.repository.UserRepository;
+import com.kelp_6.banking_apps.entity.*;
+import com.kelp_6.banking_apps.repository.*;
 import com.kelp_6.banking_apps.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +18,18 @@ import java.util.*;
 @Slf4j
 public class DatabaseSeeder {
 
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final TransactionRepository transactionRepository;
-
-    @Autowired
     private final AccountRepository accountRepository;
+    private final AccountTypeRepository accountTypeRepository;
+    private final LoginInfosRepository loginInfosRepository;
 
     @Transactional
     public void setup(){
         transactionRepository.hardDeleteAll();
         accountRepository.hardDeleteAll();
+        accountTypeRepository.hardDeleteAll();
+        loginInfosRepository.hardDeleteAll();
         userRepository.hardDeleteAll();
 
         // SEED USERS
@@ -50,6 +44,8 @@ public class DatabaseSeeder {
                     .username("test" + i + "@test.com")
                     .password(passwordEncoder.encode(String.format("Password_%d", i)))
                     .isVerified(true)
+                    .pin("123456")
+                    .pinExpiredDate(new Date())
                     .build();
 
             listUsers.add(user);
@@ -59,22 +55,77 @@ public class DatabaseSeeder {
 
         log.info("[SUCCESS] Seeds {} records to users table", listUsers.size());
 
+        // SEED ACCOUNT TYPE
+
+        List<AccountType> accountTypes = new ArrayList<>();
+        Map<String, Double> accountType = new HashMap<>();
+        accountType.put("Ekspresi", 10000000D);
+        accountType.put("Master", 100000000D);
+
+        for(Map.Entry<String, Double> entry : accountType.entrySet()){
+            AccountType newAccountType = AccountType.builder()
+                    .name(entry.getKey())
+                    .transferLimit(entry.getValue())
+                    .build();
+            accountTypes.add(newAccountType);
+        }
+
+        accountTypeRepository.saveAll(accountTypes);
+
+        log.info("[SUCCESS] Seeds {} records to account_types table", accountTypes.size());
+
         // SEED ACCOUNT
-        int numAccount = listUsers.size();
         List<Account> listAccounts = new ArrayList<>();
 
+        int counter = 0;
         for (User listUser : listUsers) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, 2);
+            calendar.add(Calendar.HOUR_OF_DAY, 10);
+            calendar.add(Calendar.MINUTE, 30);
+
             Account account = Account.builder()
                     .accountNumber(Generator.tenDigitNumberGenerator())
                     .availableBalance(100000D)
-                    .currency("IDR")
+                    .availableBalanceCurr("IDR")
+                    .holdAmount(0D)
+                    .holdAmountCurr("IDR")
                     .user(listUser)
+                    .accountType(accountTypes.get(counter))
+                    .accountExp(calendar.getTime())
                     .build();
             listUser.setAccount(account);
             listAccounts.add(account);
+            counter++;
         }
 
         accountRepository.saveAll(listAccounts);
+
+        // SEED LOGIN INFO
+        List<Date> dates = new ArrayList<>();
+        List<LoginInfos> listLoginInfos = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        Date yesterday = calendar.getTime();
+        dates.add(yesterday);
+        dates.add(new Date());
+
+        for(User curUser : listUsers){
+            counter = 0;
+            for(Date curDate : dates){
+                LoginInfos infos = LoginInfos.builder()
+                        .ipAddress("17.172.224.47")
+                        .isSuccess(counter != 0)
+                        .location("Surabaya, Indonesia")
+                        .timestamp(curDate)
+                        .user(curUser)
+                        .build();
+                counter++;
+                listLoginInfos.add(infos);
+            }
+        }
+
+        loginInfosRepository.saveAll(listLoginInfos);
 
         // SEED TRANSACTION
         int numTransactions = 2;
