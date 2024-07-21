@@ -23,6 +23,8 @@ public class AuthController {
     public ResponseEntity<WebResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
         TokenResponse tokenResponse = this.authService.login(request);
         WebResponse<TokenResponse> response = WebResponse.<TokenResponse>builder()
+                .status("success")
+                .message("login success")
                 .data(tokenResponse)
                 .build();
 
