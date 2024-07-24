@@ -1,8 +1,12 @@
 package com.kelp_6.banking_apps.service;
 
+import com.kelp_6.banking_apps.entity.LoginInfos;
 import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.model.auth.DetailLoginInfoResponse;
+import com.kelp_6.banking_apps.model.auth.LoginInfoResponse;
 import com.kelp_6.banking_apps.model.auth.LoginRequest;
 import com.kelp_6.banking_apps.model.auth.TokenResponse;
+import com.kelp_6.banking_apps.repository.LoginInfosRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +17,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
+    private final LoginInfosRepository loginInfosRepository;
     private final ValidationService validationService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -41,8 +47,39 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         String token = this.jwtUtil.generateToken(userDetails);
 
+        LoginInfos loginInfos = LoginInfos.builder()
+                .user(user)
+                .ipAddress(request.getIpAddress())
+                .timestamp(new Date())
+                .isSuccess(true)
+                .location("Bekasi, Indonesia")
+                .build();
+
+        loginInfosRepository.save(loginInfos);
+
         return TokenResponse.builder()
                 .accessToken(token)
+                .build();
+    }
+
+    @Override
+    public LoginInfoResponse getLoginInfo(String userID) {
+        LoginInfos loginInfosSuccess = loginInfosRepository.findLoginSuccessByUser_UserID(userID).orElse(null);
+        LoginInfos loginInfosFailed = loginInfosRepository.findLoginFailedByUser_UserID(userID).orElse(null);
+
+        DetailLoginInfoResponse successfulLoginAttempt = DetailLoginInfoResponse.builder()
+                .timestamp(loginInfosSuccess != null ? loginInfosSuccess.getTimestamp().toString() : null)
+                .location(loginInfosSuccess != null ? loginInfosSuccess.getLocation() : null)
+                .build();
+
+        DetailLoginInfoResponse failedLoginAttempt = DetailLoginInfoResponse.builder()
+                .timestamp(loginInfosFailed != null ? loginInfosFailed.getTimestamp().toString() : null)
+                .location(loginInfosFailed != null ? loginInfosFailed.getLocation() : null)
+                .build();
+
+        return LoginInfoResponse.builder()
+                .lastSuccessfullLoginAttempt(successfulLoginAttempt)
+                .failedLoginAttempt(failedLoginAttempt)
                 .build();
     }
 }

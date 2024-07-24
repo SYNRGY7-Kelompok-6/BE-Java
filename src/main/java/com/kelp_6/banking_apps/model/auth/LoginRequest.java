@@ -1,5 +1,6 @@
 package com.kelp_6.banking_apps.model.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -17,4 +18,7 @@ public class LoginRequest {
 
     @NotBlank
     private String password;
+
+    @JsonIgnore
+    private String ipAddress;
 }
