@@ -88,7 +88,7 @@ public class MutationResponseMapper {
     // MUTATION MAPPER
     private DetailMutationResponse toMutationDTO(Transaction transaction){
         return DetailMutationResponse.builder()
-                .amount(toBalanceDTO(transaction.getAmount(), transaction.getCurrency()))
+                .amount(toMutationBalanceDTO(transaction.getAmount(), transaction.getRemainingBalance(), transaction.getCurrency()))
                 .transactionDate(transaction.getTransactionDate().toString())
                 .remark(transaction.getRemark())
                 .type(transaction.getType().name())
@@ -101,6 +101,14 @@ public class MutationResponseMapper {
         return AccountResponse.builder()
                 .beneficiaryAccountNumber(accountNumber)
                 .beneficiaryAccountName(accountName)
+                .build();
+    }
+
+    private MutationBalanceResponse toMutationBalanceDTO(double value, double remainingBalance, String currency){
+        return MutationBalanceResponse.builder()
+                .value(value)
+                .remainingBalance(remainingBalance)
+                .currency(currency)
                 .build();
     }
 }

@@ -48,6 +48,9 @@ public class DatabaseSeeder {
                     .pinExpiredDate(new Date())
                     .build();
 
+            if(i==0) user.setUserID("zg6kx3FFrDatGLHG");
+            if(i==1) user.setUserID("i4rnpOL3iIQZnIkj");
+
             listUsers.add(user);
         }
 
@@ -137,10 +140,13 @@ public class DatabaseSeeder {
         for(int i=0; i<numTransactions; i++){
             User owner = listUsers.get(i);
             User opposite = listUsers.get(oppositeUser.get(i));
+            owner.getAccount().setAvailableBalance(owner.getAccount().getAvailableBalance() + 10000);
+            opposite.getAccount().setAvailableBalance(opposite.getAccount().getAvailableBalance() - 10000);
 
             Transaction creditTransaction = Transaction.builder()
                     .amount(10000D)
                     .currency("IDR")
+                    .remainingBalance(owner.getAccount().getAvailableBalance())
                     .beneficiaryAccountNumber(opposite.getAccount().getAccountNumber())
                     .beneficiaryEmail(opposite.getUsername())
                     .beneficiaryName(opposite.getName())
@@ -152,6 +158,7 @@ public class DatabaseSeeder {
             Transaction debitTransaction = Transaction.builder()
                     .amount(10000D)
                     .currency("IDR")
+                    .remainingBalance(opposite.getAccount().getAvailableBalance())
                     .beneficiaryAccountNumber(owner.getAccount().getAccountNumber())
                     .beneficiaryEmail(owner.getUsername())
                     .beneficiaryName(owner.getName())

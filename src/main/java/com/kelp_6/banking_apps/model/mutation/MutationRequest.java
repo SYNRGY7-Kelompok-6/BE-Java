@@ -14,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class MutationRequest {
     @JsonIgnore
-    private String username;
+    private String userID;
 
     @JsonIgnore
     private int page;

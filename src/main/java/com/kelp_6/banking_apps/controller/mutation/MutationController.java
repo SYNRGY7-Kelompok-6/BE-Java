@@ -39,7 +39,7 @@ public class MutationController {
         toDate = DateUtil.getEndOfDay(toDate);
 
         MutationRequest request = new MutationRequest();
-        request.setUsername(userDetails.getUsername());
+        request.setUserID(userDetails.getUsername());
         request.setFromDate(fromDate);
         request.setToDate(toDate);
         request.setPage(page);

@@ -37,6 +37,9 @@ public class Transaction extends BaseEntity{
     @Column(nullable = false)
     private Double amount;
 
+    @Column(nullable = false, name = "remaining_balance")
+    private Double remainingBalance;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ETransactionType type;

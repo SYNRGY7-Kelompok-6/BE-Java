@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -25,15 +27,15 @@ public class AuthServiceImpl implements AuthService {
         this.validationService.validate(request);
 
         User user = this.userRepository
-                .findByUsername(request.getUsername())
+                .findByUserID(request.getUserID())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user not found"));
         this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
+                request.getUserID(),
                 request.getPassword()
         ));
 
         UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
+                .withUsername(user.getUserID())
                 .password(user.getPassword())
                 .authorities("USER")
                 .build();

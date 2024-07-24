@@ -31,8 +31,8 @@ public class MutationServiceImpl implements MutationService{
     public MutationResponse getMutation(MutationRequest request) {
         Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize());
 
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("user with email %s doesn't exists", request.getUsername())
+        User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
+                String.format(" %s doesn't exists", request.getUserID())
         ));
         Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
         List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
