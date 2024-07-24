@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -52,6 +53,13 @@ public class GlobalExceptionHandler {
         log.info("[ {} ] {}", HttpStatus.UNAUTHORIZED, exception.getMessage());
 
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "unauthorized");
+    }
+
+    @ExceptionHandler(value = {UsernameNotFoundException.class})
+    public ProblemDetail usernameNotFoundException(UsernameNotFoundException exception){
+        log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
+
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "bad request");
     }
 
     @ExceptionHandler(value = { AccessDeniedException.class })

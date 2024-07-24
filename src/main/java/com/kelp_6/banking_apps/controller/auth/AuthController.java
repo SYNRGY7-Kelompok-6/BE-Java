@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1.0/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/login")
+    @PostMapping({"/login", "/login/"})
     public ResponseEntity<WebResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
         TokenResponse tokenResponse = this.authService.login(request);
         WebResponse<TokenResponse> response = WebResponse.<TokenResponse>builder()

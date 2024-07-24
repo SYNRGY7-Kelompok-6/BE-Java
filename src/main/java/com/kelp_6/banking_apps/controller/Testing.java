@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class Testing {
 
     @GetMapping(
-            path = "/test",
+            path = "/ping",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<WebResponse<String>> tes(){
         WebResponse<String> response = WebResponse.<String>builder()
+                .status("success")
+                .message("server is running")
                 .data("testing OK!")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
