@@ -70,7 +70,7 @@ public class WebSecurityConfig {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(SWAGGER_URL_PATHS).permitAll()
-                                .requestMatchers("/auth/login", "/").permitAll()
+                                .requestMatchers("/auth/login", "/ping").permitAll()
                                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                                 .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
