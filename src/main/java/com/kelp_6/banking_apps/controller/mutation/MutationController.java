@@ -49,6 +49,8 @@ public class MutationController {
         MutationResponse mutationResponse = mutationService.getMutation(request);
 
         return WebResponse.<MutationResponse>builder()
+                .status("success")
+                .message("success getting account info")
                 .data(mutationResponse)
                 .build();
     }
