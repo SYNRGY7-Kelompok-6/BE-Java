@@ -31,6 +31,9 @@ public class Transaction extends BaseEntity{
     @Column(nullable = false, name = "beneficiary_email")
     private String beneficiaryEmail;
 
+    @Column(nullable = false, name = "beneficiary_name")
+    private String beneficiaryName;
+
     @Column(nullable = false)
     private Double amount;
 
