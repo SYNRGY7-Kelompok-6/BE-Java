@@ -41,7 +41,7 @@ public class AuthController {
         LoginInfoResponse loginInfoResponse = this.authService.getLoginInfo(userDetails.getUsername());
         WebResponse<LoginInfoResponse> response = WebResponse.<LoginInfoResponse>builder()
                 .status("success")
-                .message("login success")
+                .message("success getting login information")
                 .data(loginInfoResponse)
                 .build();
 
