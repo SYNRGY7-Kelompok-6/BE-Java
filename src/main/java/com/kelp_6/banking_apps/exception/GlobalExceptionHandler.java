@@ -6,12 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.AccessDeniedException;
 import java.security.SignatureException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -23,6 +28,22 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
         problemDetail.setProperty("description", exception.getCause());
 
+        return problemDetail;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail methodArgumentNotValidException(MethodArgumentNotValidException exception){
+        log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
+
+        List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
+        Map<String, String> errors = new HashMap<>();
+        for(FieldError error : fieldErrors){
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "invalid data");
+        problemDetail.setProperty("description", "requests contains invalid parameter");
+        problemDetail.setProperty("errors", errors);
         return problemDetail;
     }
 
