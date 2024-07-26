@@ -3,6 +3,7 @@ package com.kelp_6.banking_apps.mapper;
 import com.kelp_6.banking_apps.entity.Account;
 import com.kelp_6.banking_apps.entity.ETransactionType;
 import com.kelp_6.banking_apps.entity.Transaction;
+import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.model.mutation.*;
 import org.springframework.stereotype.Component;
 
@@ -109,6 +110,20 @@ public class MutationResponseMapper {
                 .value(value)
                 .remainingBalance(remainingBalance)
                 .currency(currency)
+                .build();
+    }
+
+
+    public TransactionDetailResponse toTransactionDetailDTO(User user, Transaction transaction) {
+        return TransactionDetailResponse.builder()
+                .transaction_id(transaction.getId().toString())
+                .amount(transaction.getAmount())
+                .sender_name(user.getName())
+                .sender_account(user.getId().toString())
+                .date(transaction.getTransactionDate())
+                .remark(transaction.getRemark())
+                .beneficiary_account(transaction.getBeneficiaryAccountNumber())
+                .beneficiary_name(transaction.getBeneficiaryName())
                 .build();
     }
 }
