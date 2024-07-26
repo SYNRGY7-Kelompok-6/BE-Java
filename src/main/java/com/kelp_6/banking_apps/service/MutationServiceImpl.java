@@ -12,9 +12,8 @@ import com.kelp_6.banking_apps.model.mutation.TransactionDetailResponse;
 import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
+import com.kelp_6.banking_apps.utils.UuidUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -63,14 +62,23 @@ public class MutationServiceImpl implements MutationService{
 
     @Override
     public TransactionDetailResponse getDetailTransaction(TransactionDetailRequest request) {
+
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
                 String.format(" %s doesn't exists", request.getUserID())
         ));
 
-        Transaction transaction = transactionRepository.findById(UUID.fromString(request.getTransaction_id()))
+        UUID transactionID = UuidUtil.convertStringIntoUUID(request.getTransaction_id());
+
+        Transaction transaction = transactionRepository.findById(transactionID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "transaction id doesn't exists"));
 
+        Account account = accountRepository.findByUser(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
 
-        return mutationResponseMapper.toTransactionDetailDTO(user,transaction);
+        if (!account.getAccountNumber().equals(transaction.getAccount().getAccountNumber())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "account number doesn't match");
+        }
+
+        return mutationResponseMapper.toTransactionDetailDTO(user, transaction);
     }
 }

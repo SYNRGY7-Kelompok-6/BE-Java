@@ -2,7 +2,10 @@ spring:
   application:
     name: banking-apps
   datasource:
-    url: ${DB_URL}
+#    url: ${DB_URL}
+    url: jdbc:postgresql://localhost:5432/bank-application
+    username: postgres
+    password: anggara123
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -18,5 +21,7 @@ server:
     context-path: /api/v1.0
 security:
   jwt:
-    secret-key: ${JWT_SECRET_KEY}
-    expired-milliseconds: ${JWT_EXPIRED_MILLISECONDS}
+#    secret-key: ${JWT_SECRET_KEY}
+    secret-key: eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcyMTk5ODYyOCwiaWF0IjoxNzIxOTk4NjI4fQ.mCpurlvVlvF5Lx99H-NC_ZtGl0XtJsbihFS4z4I2aiE
+#    expired-milliseconds: ${JWT_EXPIRED_MILLISECONDS}
+    expired-milliseconds: 12312413486
