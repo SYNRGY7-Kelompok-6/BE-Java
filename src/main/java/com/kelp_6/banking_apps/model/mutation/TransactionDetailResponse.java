@@ -13,12 +13,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionDetailResponse {
-    private String transaction_id;
-    private Date date;
+    private String transactionId;
     private Double amount;
+    private Date transactionDate;
     private String remark;
-    private String beneficiary_name;
-    private String beneficiary_account;
-    private String sender_name;
-    private String sender_account;
+    private String type;
+    private String beneficiaryName;
+    private String beneficiaryAccountNumber;
+    private String sourceName;
+    private String sourceAccountNumber;
 }

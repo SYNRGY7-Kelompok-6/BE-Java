@@ -114,16 +114,17 @@ public class MutationResponseMapper {
     }
 
 
-    public TransactionDetailResponse toTransactionDetailDTO(User user, Transaction transaction) {
+    public TransactionDetailResponse toTransactionDetailDTO(User user, Transaction transaction,Account account) {
         return TransactionDetailResponse.builder()
-                .transaction_id(transaction.getId().toString())
+                .transactionId(transaction.getId().toString())
                 .amount(transaction.getAmount())
-                .sender_name(user.getName())
-                .sender_account(user.getId().toString())
-                .date(transaction.getTransactionDate())
+                .sourceName(user.getName())
+                .type(transaction.getType().name())
+                .sourceAccountNumber(account.getAccountNumber())
+                .transactionDate(transaction.getTransactionDate())
                 .remark(transaction.getRemark())
-                .beneficiary_account(transaction.getBeneficiaryAccountNumber())
-                .beneficiary_name(transaction.getBeneficiaryName())
+                .beneficiaryAccountNumber(transaction.getBeneficiaryAccountNumber())
+                .beneficiaryName(transaction.getBeneficiaryName())
                 .build();
     }
 }

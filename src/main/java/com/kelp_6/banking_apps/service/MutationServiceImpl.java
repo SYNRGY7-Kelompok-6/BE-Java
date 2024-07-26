@@ -79,6 +79,6 @@ public class MutationServiceImpl implements MutationService{
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "account number doesn't match");
         }
 
-        return mutationResponseMapper.toTransactionDetailDTO(user, transaction);
+        return mutationResponseMapper.toTransactionDetailDTO(user, transaction,account);
     }
 }
