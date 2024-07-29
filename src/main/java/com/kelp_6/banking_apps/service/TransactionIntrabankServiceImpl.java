@@ -40,7 +40,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "source account number doesn't exists"));
         if (request.getBeneficiaryAccountNumber().equals(srcAccount.getAccountNumber())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "can't transfer to oneself account");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't transfer to oneself account");
         }
         Account benAccount = accountRepository.findByAccountNumber(request.getBeneficiaryAccountNumber())
                 .orElseThrow(() ->
