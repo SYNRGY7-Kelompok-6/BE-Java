@@ -57,5 +57,5 @@ public class Transaction extends BaseEntity{
     @JoinColumn(name = "source_account_number", referencedColumnName = "account_number")
     private Account account;
     // with assumption when perform transaction should create 2 new records
-    // with 2 diff transaction type and owner (sender-credit, recipient-debit)
+    // with 2 diff transaction type and owner (sender-debit, recipient-credit)
 }
