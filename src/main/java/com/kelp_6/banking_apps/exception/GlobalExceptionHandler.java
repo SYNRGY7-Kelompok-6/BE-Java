@@ -121,7 +121,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status(exception.getStatusCode().toString().substring(4))
+                .status(exception.getStatusCode().toString().substring(4).replace("_", " "))
                 .message(exception.getReason())
                 .data(null)
                 .build();
