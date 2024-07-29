@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
     @Override
-    public boolean validatePin(PinValidationRequest pinValidationRequest) {
+    public PinTokenResponse validatePin(PinValidationRequest pinValidationRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
         logger.debug("Authenticating user with ID: {}", userId);
@@ -95,10 +95,19 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUserID(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user not found"));
         logger.debug("User found: {}", user);
+
         if (passwordEncoder.matches(pinValidationRequest.getPin(), user.getPin())) {
-            return true;
+            String accountNumber = user.getAccount().getAccountNumber();
+            String transactionToken = jwtUtil.generateTransactionToken(accountNumber);
+            return PinTokenResponse.builder()
+                    .pinToken(transactionToken)
+                    .build();
         } else {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid PIN");
         }
     }
+
+
+
+
 }

@@ -1,9 +1,6 @@
 package com.kelp_6.banking_apps.controller.auth;
 
-import com.kelp_6.banking_apps.model.auth.LoginInfoResponse;
-import com.kelp_6.banking_apps.model.auth.LoginRequest;
-import com.kelp_6.banking_apps.model.auth.PinValidationRequest;
-import com.kelp_6.banking_apps.model.auth.TokenResponse;
+import com.kelp_6.banking_apps.model.auth.*;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,15 +46,18 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping({"/validate-pin", "/validate-pin/"})
-    public ResponseEntity<WebResponse<Void>> validatePin(@RequestBody PinValidationRequest pinValidationRequest) {
-        boolean isValid = authService.validatePin(pinValidationRequest);
+    public ResponseEntity<WebResponse<PinTokenResponse>> validatePin(@RequestBody PinValidationRequest pinValidationRequest) {
+        PinTokenResponse pinTokenResponse = authService.validatePin(pinValidationRequest);
 
-        WebResponse<Void> response = WebResponse.<Void>builder()
+        WebResponse<PinTokenResponse> response = WebResponse.<PinTokenResponse>builder()
                 .status("success")
                 .message("pin valid")
-                .data(null)
+                .data(pinTokenResponse)
                 .build();
-        //belum return token baru
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+
+
 }

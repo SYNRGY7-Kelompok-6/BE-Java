@@ -19,7 +19,6 @@ public class JwtUtil {
     @Value("${security.jwt.expired-milliseconds}")
     private long EXPIRATION_TIME; // 1 day in milliseconds
 
-
     @Value("${security.jwt.transaction-secret-key}")
     private String TRANSACTION_SECRET_KEY;
 
@@ -36,11 +35,19 @@ public class JwtUtil {
                 .signWith(this.SIGNATURE_ALGORITHM, this.SECRET_KEY.getBytes())
                 .compact();
     }
-
+    public String generateTransactionToken(String accountNumber) {
+        return Jwts.builder()
+                .setSubject(accountNumber)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + this.TRANSACTION_EXPIRATION_TIME))
+                .signWith(this.SIGNATURE_ALGORITHM, this.TRANSACTION_SECRET_KEY.getBytes())
+                .compact();
+    }
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
