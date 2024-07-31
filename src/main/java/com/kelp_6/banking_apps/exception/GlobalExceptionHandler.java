@@ -199,4 +199,3 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-

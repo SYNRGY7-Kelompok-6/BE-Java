@@ -49,7 +49,7 @@ public class DatabaseSeeder {
                     .username("test" + i + "@test.com")
                     .password(passwordEncoder.encode(String.format("Password_%d", i)))
                     .isVerified(true)
-                    .pin("123456")
+                    .pin(passwordEncoder.encode("123456"))
                     .pinExpiredDate(calendar.getTime())
                     .build();
 
