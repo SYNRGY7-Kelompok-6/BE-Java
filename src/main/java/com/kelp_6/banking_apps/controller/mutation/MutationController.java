@@ -1,18 +1,17 @@
 package com.kelp_6.banking_apps.controller.mutation;
 
-import com.kelp_6.banking_apps.model.mutation.MutationRequest;
-import com.kelp_6.banking_apps.model.mutation.MutationResponse;
-import com.kelp_6.banking_apps.model.mutation.TransactionDetailRequest;
-import com.kelp_6.banking_apps.model.mutation.TransactionDetailResponse;
+import com.kelp_6.banking_apps.model.mutation.*;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.MutationService;
 import com.kelp_6.banking_apps.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 
@@ -77,4 +76,26 @@ public class MutationController {
                 .build();
     }
 
+
+    @GetMapping("/monthly")
+    public WebResponse<AccountMonthlyResponse> getMutationMonthly(
+            Authentication authentication,
+            @RequestParam(value = "month") String months
+    ){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        try {
+            int month = Integer.parseInt(months);
+            AccountMonthlyResponse response = mutationService.getMonthlyMutation(month,userDetails.getUsername());
+
+            return WebResponse.<AccountMonthlyResponse>builder()
+                    .status("success")
+                    .message("success getting account info")
+                    .data(response)
+                    .build();
+
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Cannot Find Month");
+        }
+    }
 }

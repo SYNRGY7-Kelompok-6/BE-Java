@@ -19,6 +19,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -79,5 +82,32 @@ public class MutationServiceImpl implements MutationService{
         }
 
         return mutationResponseMapper.toTransactionDetailDTO(user, transaction,account);
+    }
+
+    @Override
+    public AccountMonthlyResponse getMonthlyMutation(int month, String username) {
+
+        LocalDate now = LocalDate.now();
+        YearMonth yearMonth = YearMonth.of(now.getYear(), month);
+
+        LocalDate earlyMonthDate = yearMonth.atDay(1);
+        LocalDateTime earlyMonth = earlyMonthDate.atStartOfDay();
+
+        LocalDate endMonthDate = yearMonth.atEndOfMonth();
+        LocalDateTime endMonth = endMonthDate.atTime(23, 59, 59, 999999999);
+
+        User user = userRepository.findByUserID(username).orElseThrow(() -> new UsernameNotFoundException(
+                String.format(" %s doesn't exists", username)
+        ));
+
+        Account account = accountRepository.findByUser(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
+
+
+        List<Transaction> transactions = transactionRepository
+                .findByAccountAndDate(account.getAccountNumber(),earlyMonth,endMonth);
+
+        return mutationResponseMapper.toMonthlyMutation(transactions);
+
     }
 }
