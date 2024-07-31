@@ -15,21 +15,21 @@ import java.util.stream.Collectors;
 public class MutationResponseMapper {
     public MutationResponse toDataDTO(Account account, List<Transaction> transactions, double startingBalance){
         return MutationResponse.builder()
-                .accountInfo(toAccountInfoDTO(account, transactions))
+                .accountInfo(toAccountInfoDTO(account))
                 .accountBalance(toAccountBalanceDTO(account, startingBalance))
                 .mutations(transactions.stream().map(this::toMutationDTO).collect(Collectors.toList()))
                 .build();
     }
 
     // ACCOUNT INFO MAPPER
-    private AccountInfoResponse toAccountInfoDTO(Account account, List<Transaction> transactions){
+    private AccountInfoResponse toAccountInfoDTO(Account account){
         return AccountInfoResponse.builder()
                 .accountNo(account.getAccountNumber())
                 .accountType(account.getAccountType().getName())
                 .accountCardExp(account.getAccountExp())
                 .name(account.getUser().getName())
+                .cvv(account.getCvv())
                 .accountBalance(toAccountBalanceDetailsDTO(account))
-                .accountMonthly(calculateMonthlyIncomeOutcome(transactions))
                 .pinExpiredTimeLeft(calculatePinExpiredTimeLeft(account.getUser().getPinExpiredDate()))
                 .build();
     }
@@ -41,7 +41,7 @@ public class MutationResponseMapper {
                 .build();
     }
 
-    private AccountMonthlyResponse calculateMonthlyIncomeOutcome(List<Transaction> transactions){
+    public AccountMonthlyResponse calculateMonthlyIncomeOutcome(List<Transaction> transactions){
         double monthlyIncome = transactions.stream()
                 .filter(transaction -> transaction.getType() == ETransactionType.CREDIT)
                 .mapToDouble(Transaction::getAmount)
@@ -89,19 +89,28 @@ public class MutationResponseMapper {
     // MUTATION MAPPER
     private DetailMutationResponse toMutationDTO(Transaction transaction){
         return DetailMutationResponse.builder()
+                .transactionId(transaction.getId().toString())
                 .amount(toMutationBalanceDTO(transaction.getAmount(), transaction.getRemainingBalance(), transaction.getCurrency()))
                 .transactionDate(transaction.getTransactionDate().toString())
                 .remark(transaction.getRemark())
+                .desc(transaction.getDescription())
                 .type(transaction.getType().name())
-                .beneficiaryAccount(toAccountDetailDTO(transaction.getBeneficiaryAccountNumber(), transaction.getBeneficiaryName()))
-                .sourceAccount(toAccountDetailDTO(transaction.getAccount().getAccountNumber(), transaction.getAccount().getUser().getName()))
+                .beneficiaryAccount(toBeneficiaryAccountDetailDTO(transaction.getBeneficiaryAccountNumber(), transaction.getBeneficiaryName()))
+                .sourceAccount(toSourceAccountDetailDTO(transaction.getAccount().getAccountNumber(), transaction.getAccount().getUser().getName()))
                 .build();
     }
 
-    private AccountResponse toAccountDetailDTO(String accountNumber, String accountName){
-        return AccountResponse.builder()
+    private BeneficiaryAccountResponse toBeneficiaryAccountDetailDTO(String accountNumber, String accountName){
+        return BeneficiaryAccountResponse.builder()
                 .beneficiaryAccountNumber(accountNumber)
                 .beneficiaryAccountName(accountName)
+                .build();
+    }
+
+    private SourceAccountResponse toSourceAccountDetailDTO(String accountNumber, String accountName){
+        return SourceAccountResponse.builder()
+                .sourceAccountNumber(accountNumber)
+                .sourceAccountName(accountName)
                 .build();
     }
 

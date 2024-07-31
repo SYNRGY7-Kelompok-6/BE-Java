@@ -19,6 +19,11 @@ public class JwtUtil {
     @Value("${security.jwt.expired-milliseconds}")
     private long EXPIRATION_TIME; // 1 day in milliseconds
 
+    @Value("${security.jwt.transaction-secret-key}")
+    private String TRANSACTION_SECRET_KEY;
+
+    @Value("${security.jwt.transaction-expired-milliseconds}")
+    private long TRANSACTION_EXPIRATION_TIME;
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
     public String generateToken(UserDetails userDetails) {
@@ -27,6 +32,15 @@ public class JwtUtil {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + this.EXPIRATION_TIME))
                 .signWith(this.SIGNATURE_ALGORITHM, this.SECRET_KEY.getBytes())
+                .compact();
+    }
+
+    public String generateTransactionToken(String accountNumber) {
+        return Jwts.builder()
+                .setSubject(accountNumber)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + this.TRANSACTION_EXPIRATION_TIME))
+                .signWith(this.SIGNATURE_ALGORITHM, this.TRANSACTION_SECRET_KEY.getBytes())
                 .compact();
     }
 

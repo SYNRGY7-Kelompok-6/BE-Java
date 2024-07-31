@@ -23,10 +23,12 @@ public class DatabaseSeeder {
     private final AccountRepository accountRepository;
     private final AccountTypeRepository accountTypeRepository;
     private final LoginInfosRepository loginInfosRepository;
+    private final SavedAccountsRespository savedAccountsRespository;
 
     @Transactional
     public void setup(){
         transactionRepository.hardDeleteAll();
+        savedAccountsRespository.hardDeleteAll();
         accountRepository.hardDeleteAll();
         accountTypeRepository.hardDeleteAll();
         loginInfosRepository.hardDeleteAll();
@@ -39,13 +41,16 @@ public class DatabaseSeeder {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         for(int i=0; i<numUsers; i++){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.set(Calendar.YEAR, 2027);
             User user = User.builder()
                     .name("Test " + i)
                     .username("test" + i + "@test.com")
                     .password(passwordEncoder.encode(String.format("Password_%d", i)))
                     .isVerified(true)
-                    .pin("123456")
-                    .pinExpiredDate(new Date())
+                    .pin(passwordEncoder.encode("123456"))
+                    .pinExpiredDate(calendar.getTime())
                     .build();
 
             if(i==0) user.setUserID("zg6kx3FFrDatGLHG");
@@ -79,6 +84,9 @@ public class DatabaseSeeder {
 
         // SEED ACCOUNT
         List<Account> listAccounts = new ArrayList<>();
+        List<String> listAccountNumber = new ArrayList<>();
+        listAccountNumber.add("2859613256");
+        listAccountNumber.add("9330903549");
 
         int counter = 0;
         for (User listUser : listUsers) {
@@ -88,11 +96,12 @@ public class DatabaseSeeder {
             calendar.add(Calendar.MINUTE, 30);
 
             Account account = Account.builder()
-                    .accountNumber(Generator.tenDigitNumberGenerator())
+                    .accountNumber(listAccountNumber.get(counter))
                     .availableBalance(100000D)
                     .availableBalanceCurr("IDR")
                     .holdAmount(0D)
                     .holdAmountCurr("IDR")
+                    .cvv("56" + counter)
                     .user(listUser)
                     .accountType(accountTypes.get(counter))
                     .accountExp(calendar.getTime())
@@ -103,6 +112,8 @@ public class DatabaseSeeder {
         }
 
         accountRepository.saveAll(listAccounts);
+
+        log.info("[SUCCESS] Seeds {} records to accounts table", listAccounts.size());
 
         // SEED LOGIN INFO
         List<Date> dates = new ArrayList<>();
@@ -130,6 +141,19 @@ public class DatabaseSeeder {
 
         loginInfosRepository.saveAll(listLoginInfos);
 
+        log.info("[SUCCESS] Seeds {} records to login infos table", listLoginInfos.size());
+
+        // SEED SAVED ACCOUNTS
+        SavedAccounts savedAccounts = SavedAccounts.builder()
+                .user(listUsers.get(0))
+                .account(listUsers.get(1).getAccount())
+                .favorite(false)
+                .build();
+
+        savedAccountsRespository.save(savedAccounts);
+
+        log.info("[SUCCESS] Seeds {} records to saved accounts table", 1);
+
         // SEED TRANSACTION
         int numTransactions = 2;
         List<Transaction> listTransactions = new ArrayList<>();
@@ -151,7 +175,8 @@ public class DatabaseSeeder {
                     .beneficiaryEmail(opposite.getUsername())
                     .beneficiaryName(opposite.getName())
                     .type(ETransactionType.CREDIT)
-                    .remark("dummy transfer")
+                    .remark("Transfer")
+                    .description("dummy transfer")
                     .account(owner.getAccount())
                     .build();
 
@@ -163,7 +188,8 @@ public class DatabaseSeeder {
                     .beneficiaryEmail(owner.getUsername())
                     .beneficiaryName(owner.getName())
                     .type(ETransactionType.DEBIT)
-                    .remark("dummy transfer")
+                    .remark("Transfer")
+                    .description("dummy transfer")
                     .account(opposite.getAccount())
                     .build();
 
