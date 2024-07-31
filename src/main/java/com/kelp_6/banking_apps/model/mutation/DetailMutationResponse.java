@@ -10,10 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DetailMutationResponse {
+    private String transactionId;
     private MutationBalanceResponse amount;
     private String transactionDate;
     private String remark;
+    private String desc;
     private String type;
-    private AccountResponse beneficiaryAccount;
-    private AccountResponse sourceAccount;
+    private BeneficiaryAccountResponse beneficiaryAccount;
+    private SourceAccountResponse sourceAccount;
 }

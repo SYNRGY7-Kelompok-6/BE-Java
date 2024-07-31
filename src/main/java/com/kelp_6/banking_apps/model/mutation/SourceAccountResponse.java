@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountResponse {
-    private String beneficiaryAccountNumber;
-    private String beneficiaryAccountName;
+@Builder
+public class SourceAccountResponse {
+    private String sourceAccountNumber;
+    private String sourceAccountName;
 }
