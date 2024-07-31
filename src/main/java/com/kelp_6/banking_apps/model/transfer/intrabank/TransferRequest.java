@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferRequest {
-    @NotBlank
     @JsonIgnore
     private String userID;
+
+    @JsonIgnore
+    private String pinToken;
 
     @NotBlank
     private String beneficiaryAccountNumber;

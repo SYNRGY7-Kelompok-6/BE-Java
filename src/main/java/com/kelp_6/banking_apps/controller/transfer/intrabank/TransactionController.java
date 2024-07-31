@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/transfer-intrabank")
 @RequiredArgsConstructor
 @Slf4j
-public class TransferController {
+public class TransactionController {
     private final TransactionIntrabankService transactionIntrabankService;
 
     @PostMapping(
@@ -29,8 +29,7 @@ public class TransferController {
             @RequestBody TransferRequest request) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         request.setUserID(userDetails.getUsername());
-
-        // TODO: do pin token validation
+        request.setPinToken(pinToken);
 
         TransferResponse transferData = this.transactionIntrabankService.transfer(request);
         WebResponse<TransferResponse> response = WebResponse.<TransferResponse>builder()

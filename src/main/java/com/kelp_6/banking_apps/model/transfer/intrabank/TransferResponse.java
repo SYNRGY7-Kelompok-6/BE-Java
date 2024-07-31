@@ -12,6 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferResponse {
+    String refNumber;
     String transactionId;
     Amount amount;
     Date transactionDate;

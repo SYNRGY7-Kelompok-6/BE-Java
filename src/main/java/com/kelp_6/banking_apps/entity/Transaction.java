@@ -25,6 +25,9 @@ public class Transaction extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, name = "ref_number")
+    private String refNumber;
+
     @Column(nullable = false, name = "beneficiary_account_number")
     private String beneficiaryAccountNumber;
 

@@ -167,7 +167,9 @@ public class DatabaseSeeder {
             owner.getAccount().setAvailableBalance(owner.getAccount().getAvailableBalance() + 10000);
             opposite.getAccount().setAvailableBalance(opposite.getAccount().getAvailableBalance() - 10000);
 
+            Date transactionDate = new Date();
             Transaction creditTransaction = Transaction.builder()
+                    .refNumber(Generator.refNumberGenerator(transactionDate))
                     .amount(10000D)
                     .currency("IDR")
                     .remainingBalance(owner.getAccount().getAvailableBalance())
@@ -175,12 +177,13 @@ public class DatabaseSeeder {
                     .beneficiaryEmail(opposite.getUsername())
                     .beneficiaryName(opposite.getName())
                     .type(ETransactionType.CREDIT)
-                    .remark("Transfer")
+                    .remark("TRANSFER INTRABANK")
                     .description("dummy transfer")
                     .account(owner.getAccount())
                     .build();
 
             Transaction debitTransaction = Transaction.builder()
+                    .refNumber(Generator.refNumberGenerator(transactionDate))
                     .amount(10000D)
                     .currency("IDR")
                     .remainingBalance(opposite.getAccount().getAvailableBalance())

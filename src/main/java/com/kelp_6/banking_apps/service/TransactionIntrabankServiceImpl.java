@@ -11,8 +11,10 @@ import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.CurrencyUtil;
+import com.kelp_6.banking_apps.utils.Generator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionIntrabankServiceImpl implements TransactionIntrabankService {
@@ -27,6 +30,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final ValidationService validationService;
+    private final TransactionTokenService transactionTokenService;
 
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
@@ -39,6 +43,9 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         Account srcAccount = accountRepository.findByUser(user.getId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "source account number doesn't exists"));
+        if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
+        }
         if (request.getBeneficiaryAccountNumber().equals(srcAccount.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't transfer to oneself account");
         }
@@ -87,6 +94,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
 
         // source account transaction record
         Transaction srcAccountTransaction = Transaction.builder()
+                .refNumber(Generator.refNumberGenerator(transactionDate))
                 .beneficiaryAccountNumber(benAccount.getAccountNumber())
                 .beneficiaryEmail(benAccount.getUser().getUsername())
                 .beneficiaryName(benAccount.getUser().getName())
@@ -102,6 +110,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         this.transactionRepository.save(srcAccountTransaction);
         // beneficiary account transaction record
         Transaction benAccountTransaction = Transaction.builder()
+                .refNumber(Generator.refNumberGenerator(transactionDate))
                 .beneficiaryAccountNumber(srcAccount.getAccountNumber())
                 .beneficiaryEmail(srcAccount.getUser().getUsername())
                 .beneficiaryName(srcAccount.getUser().getName())
@@ -122,7 +131,8 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         this.accountRepository.save(benAccount);
 
         return TransferResponse.builder()
-                .transactionId(srcAccountTransaction.getId().toString()) // TODO: should replace with reference number
+                .refNumber(srcAccountTransaction.getRefNumber())
+                .transactionId(srcAccountTransaction.getId().toString())
                 .amount(request.getAmount())
                 .transactionDate(transactionDate)
                 .beneficiaryAccountNumber(srcAccountTransaction.getBeneficiaryAccountNumber())
