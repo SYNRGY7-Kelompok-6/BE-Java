@@ -26,12 +26,13 @@ public interface SavedAccountsRespository extends JpaRepository<SavedAccounts, U
             @Param("favorite") Boolean favorite
     );
 
-    @Query("select s from SavedAccounts s where s.user.id = :id and s.id = :savedAccountId")
+    @Query("select s from SavedAccounts s where s.id = :id and s.user.id = :userId")
     Optional<SavedAccounts> findByIdAndUser_Id(
-            @Param("id") UUID id,
-            @Param("savedAccountId") UUID savedAccountId
+            UUID id,
+            UUID userId
     );
 
+    boolean existsByUser_IdAndAccount_AccountNumber(UUID userID, String accountNumber);
 
 
     @Modifying

@@ -78,7 +78,7 @@ public class MutationServiceImpl implements MutationService{
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
 
         if (!account.getAccountNumber().equals(transaction.getAccount().getAccountNumber())){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "account number doesn't match");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "transaction id doesn't exists");
         }
 
         return mutationResponseMapper.toTransactionDetailDTO(user, transaction,account);

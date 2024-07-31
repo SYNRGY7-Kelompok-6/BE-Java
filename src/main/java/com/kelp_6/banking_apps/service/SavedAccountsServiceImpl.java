@@ -36,6 +36,10 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
         if(Objects.equals(user.getAccount().getAccountNumber(), beneficiaryAccount.getAccountNumber())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't add your own account to saved list");
 
+        if (savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), beneficiaryAccount.getAccountNumber())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "account already added");
+        }
+
         SavedAccounts savedAccounts = new SavedAccounts();
         savedAccounts.setAccount(beneficiaryAccount);
         savedAccounts.setUser(user);
@@ -74,7 +78,7 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(user.getId(), savedBeneficiaryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "beneficiary account not found"));
+        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(savedBeneficiaryId, user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "beneficiary account not found"));
 
         return SavedAccountsResponse.builder()
                 .savedBeneficiaryId(savedAccount.getId().toString())
@@ -90,7 +94,7 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(user.getId(), savedBeneficiaryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "beneficiary account not found"));
+        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(savedBeneficiaryId, user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "beneficiary account not found"));
 
         savedAccount.setFavorite(request.getIsFavorite());
         savedAccountsRespository.save(savedAccount);

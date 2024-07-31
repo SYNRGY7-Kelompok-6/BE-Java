@@ -132,6 +132,7 @@ public class MutationResponseMapper {
                 .sourceAccountNumber(account.getAccountNumber())
                 .transactionDate(transaction.getTransactionDate())
                 .remark(transaction.getRemark())
+                .desc(transaction.getDescription())
                 .beneficiaryAccountNumber(transaction.getBeneficiaryAccountNumber())
                 .beneficiaryName(transaction.getBeneficiaryName())
                 .build();

@@ -13,7 +13,7 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 server:
-  port: 8081
+  port: 8080
   servlet:
     context-path: /api/v1.0
 security:

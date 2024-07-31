@@ -17,6 +17,7 @@ public class TransactionDetailResponse {
     private Double amount;
     private Date transactionDate;
     private String remark;
+    private String desc;
     private String type;
     private String beneficiaryName;
     private String beneficiaryAccountNumber;
