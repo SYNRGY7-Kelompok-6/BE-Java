@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import java.security.SignatureException;
 
 @Slf4j
@@ -33,7 +35,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(value = { MethodArgumentNotValidException.class })
     public ResponseEntity<WebResponse<Object>> methodArgumentNotValidException(MethodArgumentNotValidException exception){
         log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
 
@@ -61,7 +63,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(value = {UsernameNotFoundException.class})
+    @ExceptionHandler(value = { UsernameNotFoundException.class })
     public ResponseEntity<WebResponse<Object>> usernameNotFoundException(UsernameNotFoundException exception){
         log.info("[ {} ] {}", HttpStatus.NOT_FOUND, exception.getMessage());
 
@@ -127,6 +129,20 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errResponse, exception.getStatusCode());
+    }
+
+    @ExceptionHandler(value = { NoResourceFoundException.class })
+    public ResponseEntity<WebResponse<Object>> resourceNotFoundException(NoResourceFoundException exception) {
+        log.info("[ {} ] {}", HttpStatus.NOT_FOUND, exception.getMessage());
+
+        WebResponse<Object> errResponse = WebResponse
+                .<Object>builder()
+                .status("NOT FOUND")
+                .message("resource not found")
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(errResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = { Exception.class })

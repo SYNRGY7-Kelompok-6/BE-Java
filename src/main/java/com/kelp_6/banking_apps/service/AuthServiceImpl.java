@@ -6,6 +6,7 @@ import com.kelp_6.banking_apps.model.auth.DetailLoginInfoResponse;
 import com.kelp_6.banking_apps.model.auth.LoginInfoResponse;
 import com.kelp_6.banking_apps.model.auth.LoginRequest;
 import com.kelp_6.banking_apps.model.auth.TokenResponse;
+import com.kelp_6.banking_apps.model.auth.*;
 import com.kelp_6.banking_apps.repository.LoginInfosRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.security.util.JwtUtil;
@@ -18,7 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
-import java.util.UUID;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,9 @@ public class AuthServiceImpl implements AuthService {
     private final ValidationService validationService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final TransactionTokenService transactionTokenService;
+    private final PasswordEncoder passwordEncoder;
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     public TokenResponse login(LoginRequest request) {
         this.validationService.validate(request);
@@ -81,5 +89,26 @@ public class AuthServiceImpl implements AuthService {
                 .lastSuccessfullLoginAttempt(successfulLoginAttempt)
                 .failedLoginAttempt(failedLoginAttempt)
                 .build();
+    }
+
+    @Override
+    public PinTokenResponse validatePin(PinValidationRequest pinValidationRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+        logger.info("Authenticating user with ID: {}", userId);
+
+        User user = userRepository.findByUserID(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user not found"));
+        logger.info("User found: {}", user.getName());
+
+        if (passwordEncoder.matches(pinValidationRequest.getPin(), user.getPin())) {
+            String accountNumber = user.getAccount().getAccountNumber();
+            String transactionToken = transactionTokenService.generateTransactionToken(accountNumber);
+            return PinTokenResponse.builder()
+                    .pinToken(transactionToken)
+                    .build();
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid PIN");
+        }
     }
 }

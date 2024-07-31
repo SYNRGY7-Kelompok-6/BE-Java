@@ -25,6 +25,9 @@ public class Transaction extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, name = "ref_number")
+    private String refNumber;
+
     @Column(nullable = false, name = "beneficiary_account_number")
     private String beneficiaryAccountNumber;
 
@@ -46,6 +49,8 @@ public class Transaction extends BaseEntity{
 
     private String remark;
 
+    private String description;
+
     @Column(nullable = false)
     private String currency;
 
@@ -57,5 +62,5 @@ public class Transaction extends BaseEntity{
     @JoinColumn(name = "source_account_number", referencedColumnName = "account_number")
     private Account account;
     // with assumption when perform transaction should create 2 new records
-    // with 2 diff transaction type and owner (sender-credit, recipient-debit)
+    // with 2 diff transaction type and owner (sender-debit, recipient-credit)
 }

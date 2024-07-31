@@ -1,5 +1,6 @@
 package com.kelp_6.banking_apps.utils;
 
+import java.util.Date;
 import java.util.Random;
 
 public class Generator {
@@ -20,5 +21,21 @@ public class Generator {
             builder.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
         }
         return builder.toString();
+    }
+
+    public static String fourDigitNumberGenerator() {
+        return String.valueOf(1000 + random.nextInt(9000));
+    }
+
+    public static String refNumberGenerator(Date transactionDate) {
+        return String.format("%d%d%d%d%d%d%s%s",
+                transactionDate.getYear() - 100,
+                transactionDate.getMonth() + 1,
+                transactionDate.getDate(),
+                transactionDate.getHours(),
+                transactionDate.getMinutes(),
+                transactionDate.getSeconds(),
+                Generator.fourDigitNumberGenerator(),
+                "4");
     }
 }

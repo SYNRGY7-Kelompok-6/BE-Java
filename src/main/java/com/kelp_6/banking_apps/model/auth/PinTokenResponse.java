@@ -1,4 +1,4 @@
-package com.kelp_6.banking_apps.model.mutation;
+package com.kelp_6.banking_apps.model.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountResponse {
-    private String beneficiaryAccountNumber;
-    private String beneficiaryAccountName;
+public class PinTokenResponse {
+    private String pinToken;
 }

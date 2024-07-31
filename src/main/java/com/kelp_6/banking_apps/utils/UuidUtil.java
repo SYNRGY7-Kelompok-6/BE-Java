@@ -10,7 +10,7 @@ public class UuidUtil {
         try{
             return UUID.fromString(id);
         }catch (IllegalArgumentException e){
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Invalid id");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid id format");
         }
     }
 }

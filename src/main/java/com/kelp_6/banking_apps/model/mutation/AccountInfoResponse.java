@@ -16,7 +16,7 @@ public class AccountInfoResponse {
     private String accountType;
     private Date accountCardExp;
     private String name;
+    private String cvv;
     private AccountBalanceDetailsResponse accountBalance;
-    private AccountMonthlyResponse accountMonthly;
     private int pinExpiredTimeLeft;
 }

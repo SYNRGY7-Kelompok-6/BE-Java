@@ -1,7 +1,6 @@
 package com.kelp_6.banking_apps.repository;
 
 import com.kelp_6.banking_apps.entity.Account;
-import com.kelp_6.banking_apps.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +16,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findAccountByAccountNumberAndByUser_Username(
             @Param("username") String username
     );
+
+    Optional<Account> findByAccountNumber(String accountNumber);
 
     @Modifying
     @Query(value = "delete from accounts", nativeQuery = true)
