@@ -2,7 +2,6 @@ package com.kelp_6.banking_apps.model.transfer.intrabank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +20,8 @@ public class TransferRequest {
     private String beneficiaryAccountNumber;
 
     private String remark;
+
+    private String description;
 
     private Amount amount;
 }

@@ -81,6 +81,10 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         double benAccRemainingBalance = benAccount.getAvailableBalance() + reqAmountBEN.getValue();
         Date transactionDate = new Date();
 
+        if (request.getRemark() == null || request.getRemark().isEmpty()) {
+            request.setDescription("TRANSFER INTRABANK");
+        }
+
         // source account transaction record
         Transaction srcAccountTransaction = Transaction.builder()
                 .beneficiaryAccountNumber(benAccount.getAccountNumber())
@@ -90,6 +94,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .currency(request.getAmount().getCurrency())
                 .remainingBalance(srcAccount.getAvailableBalance())
                 .remark(request.getRemark())
+                .description(request.getDescription())
                 .transactionDate(transactionDate)
                 .account(srcAccount)
                 .type(ETransactionType.DEBIT)
@@ -104,6 +109,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .currency(request.getAmount().getCurrency())
                 .remainingBalance(benAccRemainingBalance)
                 .remark(request.getRemark())
+                .description(request.getDescription())
                 .transactionDate(transactionDate)
                 .account(benAccount)
                 .type(ETransactionType.CREDIT)

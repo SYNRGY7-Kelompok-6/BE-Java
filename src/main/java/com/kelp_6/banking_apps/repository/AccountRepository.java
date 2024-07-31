@@ -25,6 +25,4 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Query(value = "SELECT * FROM accounts WHERE user_id=?1",nativeQuery = true)
     Optional<Account> findByUser(UUID user);
-
-    Optional<Account> findByAccountNumber(String accountNumber);
 }
