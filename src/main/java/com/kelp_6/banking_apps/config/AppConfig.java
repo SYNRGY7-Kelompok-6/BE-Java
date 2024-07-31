@@ -1,5 +1,6 @@
 package com.kelp_6.banking_apps.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -27,5 +28,10 @@ public class AppConfig {
                 .info(new Info().title("Connect Banking App")
                         .description("Some custom description of API.")
                         .version("1.0"));
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }
