@@ -127,4 +127,32 @@ public class MutationResponseMapper {
                 .beneficiaryName(transaction.getBeneficiaryName())
                 .build();
     }
+
+    public AccountMonthlyResponse toMonthlyMutation(List<Transaction> transactions) {
+        BalanceResponse monthlyIncome = new BalanceResponse();
+        BalanceResponse monthlyOutcome = new BalanceResponse();
+        AccountMonthlyResponse response = new AccountMonthlyResponse();
+
+        double totalIncome = 0;
+        double totalOutcome = 0;
+
+        for (Transaction transaction : transactions) {
+            if (transaction.getType() == ETransactionType.CREDIT) {
+                totalIncome += transaction.getAmount();
+            } else if (transaction.getType() == ETransactionType.DEBIT) {
+                totalOutcome += transaction.getAmount();
+            }
+        }
+
+        monthlyIncome.setValue(totalIncome);
+        monthlyIncome.setCurrency("IDR");
+        monthlyOutcome.setValue(totalOutcome);
+        monthlyOutcome.setCurrency("IDR");
+        System.out.println(monthlyIncome.getValue());
+        System.out.println(monthlyOutcome.getValue());
+        response.setMonthlyIncome(monthlyIncome);
+        response.setMonthlyOutcome(monthlyOutcome);
+
+        return response;
+    }
 }
