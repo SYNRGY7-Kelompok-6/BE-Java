@@ -43,6 +43,9 @@ public class Account extends BaseEntity{
     @Column(nullable = false, name = "hold_amount_currency")
     private String holdAmountCurr;
 
+    @Column(nullable = false)
+    private String cvv;
+
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
@@ -53,4 +56,7 @@ public class Account extends BaseEntity{
 
     @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
     private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
+    private List<SavedAccounts> savedAccounts;
 }

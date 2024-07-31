@@ -17,6 +17,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
             @Param("username") String username
     );
 
+    Optional<Account> findByAccountNumber(String accountNumber);
+
     @Modifying
     @Query(value = "delete from accounts", nativeQuery = true)
     void hardDeleteAll();

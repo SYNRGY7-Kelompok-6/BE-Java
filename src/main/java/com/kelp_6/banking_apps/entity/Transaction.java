@@ -46,6 +46,8 @@ public class Transaction extends BaseEntity{
 
     private String remark;
 
+    private String description;
+
     @Column(nullable = false)
     private String currency;
 

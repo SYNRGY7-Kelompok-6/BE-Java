@@ -47,4 +47,7 @@ public class User extends BaseEntity{
 
     @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL})
     private List<LoginInfos> loginInfos;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<SavedAccounts> savedAccounts;
 }
