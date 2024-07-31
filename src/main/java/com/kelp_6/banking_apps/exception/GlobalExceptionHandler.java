@@ -1,29 +1,22 @@
 package com.kelp_6.banking_apps.exception;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.kelp_6.banking_apps.model.web.WebResponse;
-import com.kelp_6.banking_apps.utils.StringsUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.file.AccessDeniedException;
-import java.security.SignatureException;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import static com.kelp_6.banking_apps.utils.StringsUtil.formatFieldError;
+import java.security.SignatureException;
 
 @Slf4j
 @RestControllerAdvice
@@ -42,61 +35,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(value = { MethodArgumentNotValidException.class })
     public ResponseEntity<WebResponse<Object>> methodArgumentNotValidException(MethodArgumentNotValidException exception){
         log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
 
-        // Extract field errors
-        List<String> errorMessages = exception.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(StringsUtil::formatFieldError)
-                .collect(Collectors.toList());
-
-        // Join errors into a single message
-        String formattedErrorMessage = String.join("; ", errorMessages);
-
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
                 .status("BAD REQUEST")
-                .message(formattedErrorMessage)
-                .data(null)
-                .build();
-
-        return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<WebResponse<Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
-        String errorMessage = "Invalid input. Please check your data and try again.";
-
-        Throwable cause = exception.getCause();
-        if (cause instanceof InvalidFormatException invalidFormatException) {
-            if (invalidFormatException.getTargetType() == Boolean.class) {
-                errorMessage = String.format(
-                        "Invalid boolean value: '%s'. Please provide 'true' or 'false'.",
-                        invalidFormatException.getValue()
-                );
-            }
-        }
-
-        WebResponse<Object> errResponse = WebResponse
-                .<Object>builder()
-                .status("BAD REQUEST")
-                .message(errorMessage)
-                .data(null)
-                .build();
-
-        return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<WebResponse<Object>> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception){
-        log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
-
-        WebResponse<Object> errResponse = WebResponse.builder()
-                .status("BAD REQUEST")
-                .message("invalid value: " + exception.getValue())
+                .message(exception.getMessage())
                 .data(null)
                 .build();
 
@@ -117,7 +63,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(value = {UsernameNotFoundException.class})
+    @ExceptionHandler(value = { UsernameNotFoundException.class })
     public ResponseEntity<WebResponse<Object>> usernameNotFoundException(UsernameNotFoundException exception){
         log.info("[ {} ] {}", HttpStatus.NOT_FOUND, exception.getMessage());
 
@@ -177,12 +123,26 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status(exception.getStatusCode().toString().substring(4).replace("_", " "))
+                .status(exception.getStatusCode().toString().substring(4))
                 .message(exception.getReason())
                 .data(null)
                 .build();
 
         return new ResponseEntity<>(errResponse, exception.getStatusCode());
+    }
+
+    @ExceptionHandler(value = { NoResourceFoundException.class })
+    public ResponseEntity<WebResponse<Object>> resourceNotFoundException(NoResourceFoundException exception) {
+        log.info("[ {} ] {}", HttpStatus.NOT_FOUND, exception.getMessage());
+
+        WebResponse<Object> errResponse = WebResponse
+                .<Object>builder()
+                .status("NOT FOUND")
+                .message("resource not found")
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(errResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = { Exception.class })
@@ -199,3 +159,4 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
