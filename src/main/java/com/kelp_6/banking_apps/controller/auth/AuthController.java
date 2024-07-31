@@ -4,6 +4,7 @@ import com.kelp_6.banking_apps.model.auth.*;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping({"/validate-pin", "/validate-pin/"})
-    public ResponseEntity<WebResponse<PinTokenResponse>> validatePin(@RequestBody PinValidationRequest pinValidationRequest) {
+    public ResponseEntity<WebResponse<PinTokenResponse>> validatePin(@RequestBody @Valid PinValidationRequest pinValidationRequest) {
         PinTokenResponse pinTokenResponse = authService.validatePin(pinValidationRequest);
 
         WebResponse<PinTokenResponse> response = WebResponse.<PinTokenResponse>builder()
