@@ -18,7 +18,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,10 +58,14 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         String token = this.jwtUtil.generateToken(userDetails);
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
+        calendar.setTime(new Date());
+
         LoginInfos loginInfos = LoginInfos.builder()
                 .user(user)
                 .ipAddress(request.getIpAddress())
-                .timestamp(new Date())
+                .timestamp(calendar.getTime())
                 .isSuccess(true)
                 .location("Bekasi, Indonesia")
                 .build();

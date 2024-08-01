@@ -6,7 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Data
 @MappedSuperclass
@@ -25,4 +27,18 @@ public class BaseEntity {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date deletedDate;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdDate == null) {
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Jakarta"));
+            this.createdDate = calendar.getTime();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Jakarta"));
+        this.updatedDate = calendar.getTime();
+    }
 }

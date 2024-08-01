@@ -8,6 +8,7 @@ import com.kelp_6.banking_apps.model.transfer.intrabank.Amount;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferResponse;
 import com.kelp_6.banking_apps.repository.AccountRepository;
+import com.kelp_6.banking_apps.repository.SavedAccountsRespository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.CurrencyUtil;
@@ -28,13 +29,19 @@ import java.util.Date;
 public class TransactionIntrabankServiceImpl implements TransactionIntrabankService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final SavedAccountsRespository savedAccountsRespository;
     private final TransactionRepository transactionRepository;
     private final ValidationService validationService;
     private final TransactionTokenService transactionTokenService;
 
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
-        this.validationService.validate(request);
+
+        if(!request.getRemark().equalsIgnoreCase("Transfer")){
+            if(!request.getRemark().equalsIgnoreCase("QRIS Transfer")){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown Remark");
+            }
+        }
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
                 String.format(" %s doesn't exists", request.getUserID())
@@ -49,6 +56,11 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         if (request.getBeneficiaryAccountNumber().equals(srcAccount.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't transfer to oneself account");
         }
+
+        if(request.getRemark().equalsIgnoreCase("Transfer") && !savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), request.getBeneficiaryAccountNumber())){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "account number not saved");
+        }
+
         Account benAccount = accountRepository.findByAccountNumber(request.getBeneficiaryAccountNumber())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "beneficiary account number doesn't exists"));
@@ -89,7 +101,10 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         Date transactionDate = new Date();
 
         if (request.getRemark() == null || request.getRemark().isEmpty()) {
-            request.setDescription("TRANSFER INTRABANK");
+            request.setRemark("Transfer");
+        }
+        if(request.getDesc() == null || request.getDesc().isEmpty()){
+            request.setDesc("Transfer");
         }
 
         // source account transaction record
@@ -100,9 +115,9 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .beneficiaryName(benAccount.getUser().getName())
                 .amount(request.getAmount().getValue())
                 .currency(request.getAmount().getCurrency())
-                .remainingBalance(srcAccount.getAvailableBalance())
+                .remainingBalance(srcAccRemainingBalance)
                 .remark(request.getRemark())
-                .description(request.getDescription())
+                .description(request.getDesc())
                 .transactionDate(transactionDate)
                 .account(srcAccount)
                 .type(ETransactionType.DEBIT)
@@ -118,7 +133,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .currency(request.getAmount().getCurrency())
                 .remainingBalance(benAccRemainingBalance)
                 .remark(request.getRemark())
-                .description(request.getDescription())
+                .description(request.getDesc())
                 .transactionDate(transactionDate)
                 .account(benAccount)
                 .type(ETransactionType.CREDIT)
@@ -134,7 +149,9 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .refNumber(srcAccountTransaction.getRefNumber())
                 .transactionId(srcAccountTransaction.getId().toString())
                 .amount(request.getAmount())
-                .transactionDate(transactionDate)
+                .transactionDate(transactionDate.toString())
+                .remark(srcAccountTransaction.getRemark())
+                .desc(srcAccountTransaction.getDescription())
                 .beneficiaryAccountNumber(srcAccountTransaction.getBeneficiaryAccountNumber())
                 .beneficiaryName(srcAccountTransaction.getBeneficiaryName())
                 .sourceAccountNumber(srcAccount.getAccountNumber())

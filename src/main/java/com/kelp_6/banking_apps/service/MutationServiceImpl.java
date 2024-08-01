@@ -11,7 +11,9 @@ import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.DateUtil;
 import com.kelp_6.banking_apps.utils.UuidUtil;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class MutationServiceImpl implements MutationService{
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final MutationResponseMapper mutationResponseMapper;
+    private final TransactionTokenService transactionTokenService;
 
     @Override
     public MutationResponse getMutation(MutationRequest request) {
@@ -44,22 +47,48 @@ public class MutationServiceImpl implements MutationService{
         Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
         List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
 
-        double startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions);
+        BalanceDetailsResponse startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions);
 
-        return mutationResponseMapper.toDataDTO(account, transactions, startingBalance);
+        return mutationResponseMapper.toDataDTO(account, transactions, startingBalance, transactions.get(0).getTransactionDate().toString());
+    }
+
+    @Override
+    public MutationsOnlyResponse getMutationsOnly(MutationRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize());
+
+        User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
+                String.format(" %s doesn't exists", request.getUserID())
+        ));
+        Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
+
+        if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), account.getAccountNumber())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
+        }
+
+        List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
+
+        return mutationResponseMapper.toMutationsDataDTO(transactions);
     }
 
 
-    private double calculateStartingBalance(double availableBalance, List<Transaction> transactions){
+    private BalanceDetailsResponse calculateStartingBalance(double availableBalance, List<Transaction> transactions){
         double startBalance = availableBalance;
+        Date startDate = new Date();
+        String startCurr = "IDR";
         for (Transaction transaction : transactions){
             if(transaction.getType() == ETransactionType.CREDIT){
-                startBalance += transaction.getAmount();
-            }else if(transaction.getType() == ETransactionType.DEBIT){
                 startBalance -= transaction.getAmount();
+            }else if(transaction.getType() == ETransactionType.DEBIT){
+                startBalance += transaction.getAmount();
             }
+            startDate = transaction.getTransactionDate();
+            startCurr = transaction.getCurrency();
         }
-        return startBalance;
+        return BalanceDetailsResponse.builder()
+                .dateTime(startDate.toString())
+                .value(startBalance)
+                .currency(startCurr)
+                .build();
     }
 
     @Override
@@ -76,6 +105,10 @@ public class MutationServiceImpl implements MutationService{
 
         Account account = accountRepository.findByUser(user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
+
+//        if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), account.getAccountNumber())) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
+//        }
 
         if (!account.getAccountNumber().equals(transaction.getAccount().getAccountNumber())){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "transaction id doesn't exists");

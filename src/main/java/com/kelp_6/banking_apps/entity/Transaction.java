@@ -9,7 +9,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
 @Data
@@ -57,6 +59,15 @@ public class Transaction extends BaseEntity{
     @Column(nullable = false, updatable = false, name = "transaction_date")
     @CreationTimestamp
     private Date transactionDate;
+
+    @Override
+    protected void onCreate() {
+        super.onCreate(); // Call BaseEntity's onCreate to handle common logic
+        if (transactionDate == null) {
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Jakarta"));
+            this.transactionDate = calendar.getTime();
+        }
+    }
 
     @ManyToOne
     @JoinColumn(name = "source_account_number", referencedColumnName = "account_number")
