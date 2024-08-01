@@ -11,6 +11,7 @@ import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.DateUtil;
 import com.kelp_6.banking_apps.utils.UuidUtil;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,22 +45,30 @@ public class MutationServiceImpl implements MutationService{
         Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
         List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
 
-        double startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions);
+        BalanceDetailsResponse startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions);
 
-        return mutationResponseMapper.toDataDTO(account, transactions, startingBalance);
+        return mutationResponseMapper.toDataDTO(account, transactions, startingBalance, transactions.get(0).getTransactionDate().toString());
     }
 
 
-    private double calculateStartingBalance(double availableBalance, List<Transaction> transactions){
+    private BalanceDetailsResponse calculateStartingBalance(double availableBalance, List<Transaction> transactions){
         double startBalance = availableBalance;
+        Date startDate = new Date();
+        String startCurr = "IDR";
         for (Transaction transaction : transactions){
             if(transaction.getType() == ETransactionType.CREDIT){
-                startBalance += transaction.getAmount();
-            }else if(transaction.getType() == ETransactionType.DEBIT){
                 startBalance -= transaction.getAmount();
+            }else if(transaction.getType() == ETransactionType.DEBIT){
+                startBalance += transaction.getAmount();
             }
+            startDate = transaction.getTransactionDate();
+            startCurr = transaction.getCurrency();
         }
-        return startBalance;
+        return BalanceDetailsResponse.builder()
+                .dateTime(startDate.toString())
+                .value(startBalance)
+                .currency(startCurr)
+                .build();
     }
 
     @Override

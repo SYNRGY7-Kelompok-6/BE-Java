@@ -14,6 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class TransactionDetailResponse {
     private String transactionId;
+    private String refNumber;
     private Double amount;
     private Date transactionDate;
     private String remark;

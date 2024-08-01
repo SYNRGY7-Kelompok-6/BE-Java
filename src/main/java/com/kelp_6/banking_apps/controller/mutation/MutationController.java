@@ -95,7 +95,7 @@ public class MutationController {
                     .build();
 
         }catch (NumberFormatException e){
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Cannot Find Month");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Cannot Find Month");
         }
     }
 }

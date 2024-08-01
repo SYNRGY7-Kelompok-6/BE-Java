@@ -15,7 +15,9 @@ public class TransferResponse {
     String refNumber;
     String transactionId;
     Amount amount;
-    Date transactionDate;
+    String transactionDate;
+    String remark;
+    String desc;
     String beneficiaryAccountNumber;
     String beneficiaryName;
     String sourceAccountNumber;

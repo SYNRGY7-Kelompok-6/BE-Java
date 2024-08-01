@@ -7,16 +7,18 @@ import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.model.mutation.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Component
 public class MutationResponseMapper {
-    public MutationResponse toDataDTO(Account account, List<Transaction> transactions, double startingBalance){
+    public MutationResponse toDataDTO(Account account, List<Transaction> transactions, BalanceDetailsResponse startingBalance, String endingDateBalance){
         return MutationResponse.builder()
                 .accountInfo(toAccountInfoDTO(account))
-                .accountBalance(toAccountBalanceDTO(account, startingBalance))
+                .accountBalance(toAccountBalanceDTO(account, startingBalance, endingDateBalance))
                 .mutations(transactions.stream().map(this::toMutationDTO).collect(Collectors.toList()))
                 .build();
     }
@@ -64,10 +66,10 @@ public class MutationResponseMapper {
     }
 
     // ACCOUNT BALANCE MAPPER
-    private AccountBalanceResponse toAccountBalanceDTO(Account account, double startingBalance){
+    private AccountBalanceResponse toAccountBalanceDTO(Account account, BalanceDetailsResponse startingBalance, String endingDateBalance){
         return AccountBalanceResponse.builder()
-                .startingBalance(toBalanceDetailDTO(startingBalance, account.getAvailableBalanceCurr(), new Date().toString()))
-                .endingBalance(toBalanceDetailDTO(account.getAvailableBalance(), account.getAvailableBalanceCurr(), new Date().toString()))
+                .startingBalance(startingBalance)
+                .endingBalance(toBalanceDetailDTO(account.getAvailableBalance(), account.getAvailableBalanceCurr(), endingDateBalance))
                 .build();
     }
 
@@ -126,6 +128,7 @@ public class MutationResponseMapper {
     public TransactionDetailResponse toTransactionDetailDTO(User user, Transaction transaction,Account account) {
         return TransactionDetailResponse.builder()
                 .transactionId(transaction.getId().toString())
+                .refNumber(transaction.getRefNumber())
                 .amount(transaction.getAmount())
                 .sourceName(user.getName())
                 .type(transaction.getType().name())

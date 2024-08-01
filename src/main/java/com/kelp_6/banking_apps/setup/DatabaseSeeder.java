@@ -42,6 +42,7 @@ public class DatabaseSeeder {
 
         for(int i=0; i<numUsers; i++){
             Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
             calendar.setTime(new Date());
             calendar.set(Calendar.YEAR, 2027);
             User user = User.builder()
@@ -91,6 +92,7 @@ public class DatabaseSeeder {
         int counter = 0;
         for (User listUser : listUsers) {
             Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
             calendar.add(Calendar.YEAR, 2);
             calendar.add(Calendar.HOUR_OF_DAY, 10);
             calendar.add(Calendar.MINUTE, 30);
@@ -119,6 +121,7 @@ public class DatabaseSeeder {
         List<Date> dates = new ArrayList<>();
         List<LoginInfos> listLoginInfos = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
         calendar.add(Calendar.DAY_OF_YEAR, -1);
         Date yesterday = calendar.getTime();
         dates.add(yesterday);
@@ -177,7 +180,7 @@ public class DatabaseSeeder {
                     .beneficiaryEmail(opposite.getUsername())
                     .beneficiaryName(opposite.getName())
                     .type(ETransactionType.CREDIT)
-                    .remark("TRANSFER INTRABANK")
+                    .remark("Transfer")
                     .description("dummy transfer")
                     .account(owner.getAccount())
                     .build();

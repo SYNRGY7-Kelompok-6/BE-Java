@@ -4,6 +4,7 @@ import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferResponse;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.TransactionIntrabankService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -26,7 +27,7 @@ public class TransactionController {
     public ResponseEntity<WebResponse<TransferResponse>> transfer(
             Authentication authentication,
             @RequestHeader("X-PIN-TOKEN") String pinToken,
-            @RequestBody TransferRequest request) {
+            @RequestBody @Valid TransferRequest request) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         request.setUserID(userDetails.getUsername());
         request.setPinToken(pinToken);
