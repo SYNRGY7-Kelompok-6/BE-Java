@@ -21,6 +21,12 @@ public class MutationResponseMapper {
                 .build();
     }
 
+    public MutationsOnlyResponse toMutationsDataDTO(List<Transaction> transactions) {
+        return MutationsOnlyResponse.builder()
+                .mutations(transactions.stream().map(this::toMutationDTO).collect(Collectors.toList()))
+                .build();
+    }
+
     // ACCOUNT INFO MAPPER
     private AccountInfoResponse toAccountInfoDTO(Account account){
         return AccountInfoResponse.builder()

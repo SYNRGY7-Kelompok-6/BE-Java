@@ -27,4 +27,7 @@ public class MutationRequest {
 
     @JsonIgnore
     private Date toDate;
+
+    @JsonIgnore
+    private String pinToken = null;
 }
