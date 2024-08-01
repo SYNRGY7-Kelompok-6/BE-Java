@@ -84,7 +84,7 @@ public class MutationController {
 
         return WebResponse.<MutationsOnlyResponse>builder()
                 .status("success")
-                .message("success getting account info")
+                .message("success getting mutations info")
                 .data(mutationsOnlyResponse)
                 .build();
     }
