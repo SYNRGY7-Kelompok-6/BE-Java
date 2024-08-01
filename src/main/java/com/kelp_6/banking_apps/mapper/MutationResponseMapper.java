@@ -29,7 +29,7 @@ public class MutationResponseMapper {
                 .accountCardExp(account.getAccountExp())
                 .name(account.getUser().getName())
                 .cvv(account.getCvv())
-                .accountBalance(toAccountBalanceDetailsDTO(account))
+                .balance(toAccountBalanceDetailsDTO(account))
                 .pinExpiredTimeLeft(calculatePinExpiredTimeLeft(account.getUser().getPinExpiredDate()))
                 .build();
     }
