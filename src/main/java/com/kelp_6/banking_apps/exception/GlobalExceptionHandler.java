@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -100,6 +101,17 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<WebResponse<Object>> handleMissingRequestHeader(MissingRequestHeaderException ex) {
+        WebResponse<Object> response = WebResponse.<Object>builder()
+                .status("error")
+                .message("Required header is missing: " + ex.getHeaderName())
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = { BadCredentialsException.class })
