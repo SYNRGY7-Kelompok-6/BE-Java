@@ -55,7 +55,7 @@ public class MutationController {
                 .build();
     }
 
-    @GetMapping("/detail")
+    @GetMapping("/mutations/detail")
     public WebResponse<TransactionDetailResponse> getTransactionDetail(
             Authentication authentication,
             @RequestParam(value = "id_transaction") String id
