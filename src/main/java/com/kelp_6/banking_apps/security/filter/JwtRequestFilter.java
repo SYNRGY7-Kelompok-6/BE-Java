@@ -39,7 +39,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final HashSet<String> withoutJwtUrls = new HashSet<>(
             Arrays.asList(
                     "/api/v1.0/auth/login",
-                    "/api/v1.0/ping")
+                    "/api/v1.0/ping",
+                    "/api/v1.0",
+                    "/api/v1.0/swagger-ui/index.html")
+    );
+    private final HashSet<String> swaggerUrls = new HashSet<>(
+            Arrays.asList(
+                    "/api/v1.0/swagger-ui/index.html",
+                    "/api/v1.0/swagger-resources",
+                    "/api/v1.0/v2/api-docs",
+                    "/api/v1.0/webjars",
+                    "/api/v1.0/swaggerfox.js",
+                    "/api/v1.0/swagger-ui",
+                    "/api/v1.0/v3/api-docs"
+            )
     );
 
     @Override
@@ -48,10 +61,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain chain)
             throws ServletException, IOException {
+        log.info(request.getRequestURI());
+
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            if (this.withoutJwtUrls.contains(request.getRequestURI())) {
+            if (this.withoutJwtUrls.contains(request.getRequestURI())
+                    || this.swaggerUrls.stream().anyMatch(s -> request.getRequestURI().contains(s))) {
                 chain.doFilter(request, response);
                 return;
             }
@@ -86,7 +102,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             chain.doFilter(request, response);
         } catch (Exception e) {
-            log.info(e.getClass().getName());
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }
