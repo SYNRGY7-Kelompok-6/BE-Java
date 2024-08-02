@@ -217,7 +217,7 @@ public class GlobalExceptionHandler {
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
                 .status("INTERNAL SERVER ERROR")
-                .message("something wrong")
+                .message(exception.getCause().getMessage())
                 .data(null)
                 .build();
 
