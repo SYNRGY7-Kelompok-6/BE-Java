@@ -1,16 +1,10 @@
 package com.kelp_6.banking_apps.service;
 
-import com.kelp_6.banking_apps.entity.Account;
-import com.kelp_6.banking_apps.entity.ETransactionType;
-import com.kelp_6.banking_apps.entity.Transaction;
-import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.entity.*;
 import com.kelp_6.banking_apps.model.transfer.intrabank.Amount;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferResponse;
-import com.kelp_6.banking_apps.repository.AccountRepository;
-import com.kelp_6.banking_apps.repository.SavedAccountsRespository;
-import com.kelp_6.banking_apps.repository.TransactionRepository;
-import com.kelp_6.banking_apps.repository.UserRepository;
+import com.kelp_6.banking_apps.repository.*;
 import com.kelp_6.banking_apps.utils.CurrencyUtil;
 import com.kelp_6.banking_apps.utils.Generator;
 import jakarta.transaction.Transactional;
@@ -31,11 +25,13 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private final AccountRepository accountRepository;
     private final SavedAccountsRespository savedAccountsRespository;
     private final TransactionRepository transactionRepository;
+    private final BlacklistedUserPinTokenRepository blacklistedUserPinTokenRepository;
     private final ValidationService validationService;
     private final TransactionTokenService transactionTokenService;
 
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
+        this.validationService.validate(request);
 
         if(!request.getRemark().equalsIgnoreCase("Transfer")){
             if(!request.getRemark().equalsIgnoreCase("QRIS Transfer")){
@@ -50,13 +46,13 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         Account srcAccount = accountRepository.findByUser(user.getId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "source account number doesn't exists"));
-        if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
+        if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())
+            || this.blacklistedUserPinTokenRepository.existsByUser_IdAndPinToken(user.getId(), request.getPinToken())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
         if (request.getBeneficiaryAccountNumber().equals(srcAccount.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't transfer to oneself account");
         }
-
         if(request.getRemark().equalsIgnoreCase("Transfer") && !savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), request.getBeneficiaryAccountNumber())){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "account number not saved");
         }
@@ -144,6 +140,12 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         this.accountRepository.save(srcAccount);
         benAccount.setAvailableBalance(benAccRemainingBalance);
         this.accountRepository.save(benAccount);
+
+        BlacklistedUserPinToken blacklistedPinToken = BlacklistedUserPinToken.builder()
+                .user(user)
+                .pinToken(request.getPinToken())
+                .build();
+        this.blacklistedUserPinTokenRepository.save(blacklistedPinToken);
 
         return TransferResponse.builder()
                 .refNumber(srcAccountTransaction.getRefNumber())
