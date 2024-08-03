@@ -9,11 +9,8 @@ import com.kelp_6.banking_apps.model.mutation.*;
 import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
-import com.kelp_6.banking_apps.utils.DateUtil;
 import com.kelp_6.banking_apps.utils.UuidUtil;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,9 +18,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +32,7 @@ public class MutationServiceImpl implements MutationService{
     private final TransactionRepository transactionRepository;
     private final MutationResponseMapper mutationResponseMapper;
     private final TransactionTokenService transactionTokenService;
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     @Override
     public MutationResponse getMutation(MutationRequest request) {
@@ -47,9 +44,15 @@ public class MutationServiceImpl implements MutationService{
         Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
         List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
 
-        BalanceDetailsResponse startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions);
+        BalanceDetailsResponse startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions, user.getCreatedDate());
 
-        return mutationResponseMapper.toDataDTO(account, transactions, startingBalance, transactions.get(0).getTransactionDate().toString());
+        String endingDateBalance = formatter.format(new Date());
+
+        if(!transactions.isEmpty()){
+            endingDateBalance = formatter.format(transactions.get(0).getTransactionDate());
+        }
+
+        return mutationResponseMapper.toDataDTO(account, transactions, startingBalance, endingDateBalance);
     }
 
     @Override
@@ -71,9 +74,9 @@ public class MutationServiceImpl implements MutationService{
     }
 
 
-    private BalanceDetailsResponse calculateStartingBalance(double availableBalance, List<Transaction> transactions){
+    private BalanceDetailsResponse calculateStartingBalance(double availableBalance, List<Transaction> transactions, Date startBalanceDate){
         double startBalance = availableBalance;
-        Date startDate = new Date();
+        Date startDate = startBalanceDate;
         String startCurr = "IDR";
         for (Transaction transaction : transactions){
             if(transaction.getType() == ETransactionType.CREDIT){
@@ -85,7 +88,7 @@ public class MutationServiceImpl implements MutationService{
             startCurr = transaction.getCurrency();
         }
         return BalanceDetailsResponse.builder()
-                .dateTime(startDate.toString())
+                .dateTime(formatter.format(startDate))
                 .value(startBalance)
                 .currency(startCurr)
                 .build();

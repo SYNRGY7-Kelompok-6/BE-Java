@@ -214,10 +214,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<WebResponse<Object>> allException(Exception exception) {
         log.info("[ {} ] {}", HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
 
+        // Get the cause if it exists
+        Throwable cause = exception.getCause();
+        String causeMessage = (cause != null) ? cause.getMessage() : exception.getMessage();
+
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
                 .status("INTERNAL SERVER ERROR")
-                .message(exception.getCause().getMessage())
+                .message(causeMessage)
                 .data(null)
                 .build();
 

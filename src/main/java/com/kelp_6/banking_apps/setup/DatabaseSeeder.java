@@ -46,7 +46,7 @@ public class DatabaseSeeder {
             calendar.setTime(new Date());
             calendar.set(Calendar.YEAR, 2027);
             User user = User.builder()
-                    .name("Test " + i)
+                    .name((i == 0) ? "Muh. Sabili" : "Abilsabili")
                     .username("test" + i + "@test.com")
                     .password(passwordEncoder.encode(String.format("Password_%d", i)))
                     .isVerified(true)
