@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SavedAccountsRequest {
     @NotBlank(message = "account number can't be blank")
-    @Size(min = 10, max = 10, message = "pin's length must be 10")
-    @Pattern(regexp = "\\d++", message = "Pin must contain only numbers")
+    @Size(min = 10, max = 10, message = "account number's length must be 10")
+    @Pattern(regexp = "\\d++", message = "account number should contain only numbers")
     private String beneficiaryAccountNumber;
 
     @JsonIgnore

@@ -37,8 +37,8 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
 
-        if(!request.getRemark().equalsIgnoreCase("Transfer")){
-            if(!request.getRemark().equalsIgnoreCase("QRIS Transfer")){
+        if(request.getRemark() == null || !request.getRemark().equalsIgnoreCase("Transfer")){
+            if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer") && !request.getRemark().equalsIgnoreCase("QRIS Pay"))){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown Remark");
             }
         }
@@ -100,11 +100,8 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         double benAccRemainingBalance = benAccount.getAvailableBalance() + reqAmountBEN.getValue();
         Date transactionDate = new Date();
 
-        if (request.getRemark() == null || request.getRemark().isEmpty()) {
-            request.setRemark("Transfer");
-        }
         if(request.getDesc() == null || request.getDesc().isEmpty()){
-            request.setDesc("Transfer");
+            request.setDesc(request.getRemark());
         }
 
         // source account transaction record
