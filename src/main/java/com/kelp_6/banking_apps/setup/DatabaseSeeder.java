@@ -54,8 +54,8 @@ public class DatabaseSeeder {
                     .pinExpiredDate(calendar.getTime())
                     .build();
 
-            if(i==0) user.setUserID("zg6kx3FFrDatGLHG");
-            if(i==1) user.setUserID("i4rnpOL3iIQZnIkj");
+            if(i==0) user.setUserID("user001");
+            if(i==1) user.setUserID("user002");
 
             listUsers.add(user);
         }
