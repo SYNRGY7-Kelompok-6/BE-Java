@@ -9,6 +9,9 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import java.text.SimpleDateFormat;
 
 @Configuration
 @RequiredArgsConstructor
@@ -34,4 +37,11 @@ public class AppConfig {
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
+
+    @Bean
+    @Primary
+    public SimpleDateFormat simpleDateFormat(){return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");}
+
+    @Bean
+    public SimpleDateFormat birthDateFormat(){return new SimpleDateFormat("dd-MM-yyyy");}
 }

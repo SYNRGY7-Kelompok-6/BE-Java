@@ -22,3 +22,7 @@ security:
     expired-milliseconds: ${JWT_EXPIRED_MILLISECONDS}
     transaction-secret-key: ${JWT_TRANSACTION_SECRET_KEY}
     transaction-expired-milliseconds: ${JWT_TRANSACTION_EXPIRED_MILLISECONDS}
+cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME}
+    api-key: ${CLOUDINARY_API_KEY}
+    api-secret: ${CLOUDINARY_API_SECRET}

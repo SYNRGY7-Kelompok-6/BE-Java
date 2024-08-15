@@ -32,7 +32,7 @@ public class MutationServiceImpl implements MutationService{
     private final TransactionRepository transactionRepository;
     private final MutationResponseMapper mutationResponseMapper;
     private final TransactionTokenService transactionTokenService;
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private final SimpleDateFormat formatter;
 
     @Override
     public MutationResponse getMutation(MutationRequest request) {
