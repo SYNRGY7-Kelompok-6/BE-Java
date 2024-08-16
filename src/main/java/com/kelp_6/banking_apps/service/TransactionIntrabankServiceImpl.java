@@ -16,6 +16,8 @@ import com.kelp_6.banking_apps.utils.Generator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class TransactionIntrabankServiceImpl implements TransactionIntrabankService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(TransactionIntrabankServiceImpl.class);
+
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final SavedAccountsRespository savedAccountsRespository;
@@ -36,6 +40,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
 
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
+        LOGGER.info("accessed");
 
         if(request.getRemark() == null || !request.getRemark().equalsIgnoreCase("Transfer")){
             if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer") && !request.getRemark().equalsIgnoreCase("QRIS Pay"))){

@@ -6,6 +6,8 @@ import com.kelp_6.banking_apps.service.MutationService;
 import com.kelp_6.banking_apps.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class MutationController {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MutationController.class);
     private final MutationService mutationService;
 
     @GetMapping({"", "/"})
@@ -30,6 +33,8 @@ public class MutationController {
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize
             ) {
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         fromDate = (fromDate == null) ? new Date() : fromDate;
@@ -64,6 +69,8 @@ public class MutationController {
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize
     ) {
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         fromDate = (fromDate == null) ? new Date() : fromDate;
@@ -95,6 +102,7 @@ public class MutationController {
 //            @RequestHeader("X-PIN-TOKEN") String pinToken,
             @RequestParam(value = "id_transaction") String id
     ){
+        LOGGER.info("accessed");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -119,6 +127,8 @@ public class MutationController {
 
             @RequestParam(value = "month") String months
     ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         try {
@@ -131,7 +141,7 @@ public class MutationController {
                     .data(response)
                     .build();
 
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Cannot Find Month");
         }
     }

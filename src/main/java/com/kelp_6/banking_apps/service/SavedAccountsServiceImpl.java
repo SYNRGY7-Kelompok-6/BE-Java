@@ -11,6 +11,8 @@ import com.kelp_6.banking_apps.repository.SavedAccountsRespository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.UuidUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +21,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SavedAccountsServiceImpl implements SavedAccountsService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(SavedAccountsServiceImpl.class);
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final SavedAccountsRespository savedAccountsRespository;
@@ -31,6 +33,8 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
     @Override
     @Transactional
     public SavedAccountsResponse addSavedAccount(SavedAccountsRequest request) {
+        LOGGER.info("accessed");
+
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
         Account beneficiaryAccount = accountRepository.findByAccountNumber(request.getBeneficiaryAccountNumber()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number not found"));
 
@@ -57,6 +61,8 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
     @Override
     public List<SavedAccountsResponse> getAllSavedAccounts(SavedAccountsRequest request) {
+        LOGGER.info("accessed");
+
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
         List<SavedAccounts> savedAccountByUserId =
@@ -74,6 +80,8 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
     @Override
     public SavedAccountsResponse getSavedAccount(SavedAccountsRequest request) {
+        LOGGER.info("accessed");
+
         UUID savedBeneficiaryId = UuidUtil.convertStringIntoUUID(request.getSavedBeneficiaryId());
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
@@ -90,6 +98,8 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
     @Override
     public SavedAccountsResponse updateSavedAccount(UpdateSavedAccountRequest request) {
+        LOGGER.info("accessed");
+
         UUID savedBeneficiaryId = UuidUtil.convertStringIntoUUID(request.getSavedBeneficiaryId());
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
