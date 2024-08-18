@@ -5,7 +5,6 @@ import com.kelp_6.banking_apps.repository.*;
 import com.kelp_6.banking_apps.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,9 @@ public class DatabaseSeeder {
         loginInfosRepository.hardDeleteAll();
         userRepository.hardDeleteAll();
 
-        // SEED USERS
+        /*
+            USER SEEDER
+        */
         int numUsers = 2;
         List<User> listUsers = new ArrayList<>();
 
@@ -60,12 +61,39 @@ public class DatabaseSeeder {
             listUsers.add(user);
         }
 
-        userRepository.saveAll(listUsers);
+        // seed additional users
+        Calendar calendarAdd = Calendar.getInstance();
+        calendarAdd.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
+        calendarAdd.setTime(new Date());
+        calendarAdd.set(Calendar.YEAR, 2028);
 
+        User userAdd1 = User.builder()
+                .name("Raisa Winarsih")
+                .username("raisa@test.com")
+                .password(passwordEncoder.encode("Password"))
+                .isVerified(true)
+                .pin(passwordEncoder.encode("654321"))
+                .pinExpiredDate(calendarAdd.getTime())
+                .userID("user003")
+                .build();
+        listUsers.add(userAdd1);
+        User userAdd2 = User.builder()
+                .name("Yahya Anggriawan")
+                .username("yahya@test.com")
+                .password(passwordEncoder.encode("Password"))
+                .isVerified(true)
+                .pin(passwordEncoder.encode("654321"))
+                .pinExpiredDate(calendarAdd.getTime())
+                .userID("user004")
+                .build();
+        listUsers.add(userAdd2);
+
+        userRepository.saveAll(listUsers);
         log.info("[SUCCESS] Seeds {} records to users table", listUsers.size());
 
-        // SEED ACCOUNT TYPE
-
+        /*
+            ACCOUNT TYPE SEEDER
+        */
         List<AccountType> accountTypes = new ArrayList<>();
         Map<String, Double> accountType = new HashMap<>();
         accountType.put("Ekspresi", 10000000D);
@@ -80,17 +108,20 @@ public class DatabaseSeeder {
         }
 
         accountTypeRepository.saveAll(accountTypes);
-
         log.info("[SUCCESS] Seeds {} records to account_types table", accountTypes.size());
 
-        // SEED ACCOUNT
+        /*
+            ACCOUNT SEEDER
+        */
         List<Account> listAccounts = new ArrayList<>();
         List<String> listAccountNumber = new ArrayList<>();
         listAccountNumber.add("2859613256");
         listAccountNumber.add("9330903549");
+        listAccountNumber.add("2860724357");
+        listAccountNumber.add("9341014650");
 
         int counter = 0;
-        for (User listUser : listUsers) {
+        for (User user : listUsers) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
             calendar.add(Calendar.YEAR, 2);
@@ -104,20 +135,21 @@ public class DatabaseSeeder {
                     .holdAmount(0D)
                     .holdAmountCurr("IDR")
                     .cvv("56" + counter)
-                    .user(listUser)
-                    .accountType(accountTypes.get(counter))
+                    .user(user)
+                    .accountType(accountTypes.get(counter % 2 == 0 ? 0 : 1))
                     .accountExp(calendar.getTime())
                     .build();
-            listUser.setAccount(account);
+            user.setAccount(account);
             listAccounts.add(account);
             counter++;
         }
 
         accountRepository.saveAll(listAccounts);
-
         log.info("[SUCCESS] Seeds {} records to accounts table", listAccounts.size());
 
-        // SEED LOGIN INFO
+        /*
+            LOGIN INFO SEEDER
+        */
         List<Date> dates = new ArrayList<>();
         List<LoginInfos> listLoginInfos = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -143,68 +175,88 @@ public class DatabaseSeeder {
         }
 
         loginInfosRepository.saveAll(listLoginInfos);
-
         log.info("[SUCCESS] Seeds {} records to login infos table", listLoginInfos.size());
 
-        // SEED SAVED ACCOUNTS
-        SavedAccounts savedAccounts = SavedAccounts.builder()
-                .user(listUsers.get(0))
-                .account(listUsers.get(1).getAccount())
-                .favorite(false)
-                .build();
+        /*
+            SAVED ACCOUNT SEEDER
+        */
+        HashMap<Integer, List<Integer>> savedAccIx = new HashMap<>();
+        savedAccIx.put(0, List.of(1, 2));
+        savedAccIx.put(1, List.of(2, 3));
+        savedAccIx.put(2, List.of(3, 0));
+        savedAccIx.put(3, List.of(0, 1));
+        List<SavedAccounts> savedAccounts = new ArrayList<>();
 
-        savedAccountsRespository.save(savedAccounts);
+        for (Integer key : savedAccIx.keySet()) {
+            for (int item : savedAccIx.get(key)) {
+                savedAccounts.add(
+                        SavedAccounts.builder()
+                                .user(listUsers.get(key))
+                                .account(listUsers.get(item).getAccount())
+                                .favorite(true)
+                                .build()
+                );
+            }
+        }
 
+        savedAccountsRespository.saveAll(savedAccounts);
         log.info("[SUCCESS] Seeds {} records to saved accounts table", 1);
 
-        // SEED TRANSACTION
-        int numTransactions = 2;
+        /*
+            TRANSACTION SEEDER
+        */
+        // "Transfer" type transaction
         List<Transaction> listTransactions = new ArrayList<>();
         Map<Integer, Integer> oppositeUser = new HashMap<>();
         oppositeUser.put(0, 1);
         oppositeUser.put(1, 0);
+        oppositeUser.put(2, 3);
+        oppositeUser.put(3, 2);
 
-        for(int i=0; i<numTransactions; i++){
-            User owner = listUsers.get(i);
-            User opposite = listUsers.get(oppositeUser.get(i));
-            owner.getAccount().setAvailableBalance(owner.getAccount().getAvailableBalance() + 10000);
-            opposite.getAccount().setAvailableBalance(opposite.getAccount().getAvailableBalance() - 10000);
+        for(int i=0; i<oppositeUser.size(); i++){
+            for (int j=0; j<2; j++) {
+                double amount = Generator.numberRangeGenerator(10, 20) * 1000;
 
-            Date transactionDate = new Date();
-            Transaction creditTransaction = Transaction.builder()
-                    .refNumber(Generator.refNumberGenerator(transactionDate))
-                    .amount(10000D)
-                    .currency("IDR")
-                    .remainingBalance(owner.getAccount().getAvailableBalance())
-                    .beneficiaryAccountNumber(opposite.getAccount().getAccountNumber())
-                    .beneficiaryEmail(opposite.getUsername())
-                    .beneficiaryName(opposite.getName())
-                    .type(ETransactionType.CREDIT)
-                    .remark("Transfer")
-                    .description("dummy transfer")
-                    .account(owner.getAccount())
-                    .build();
+                User owner = listUsers.get(i);
+                User opposite = listUsers.get(oppositeUser.get(i));
+                owner.getAccount().setAvailableBalance(owner.getAccount().getAvailableBalance() + amount);
+                opposite.getAccount().setAvailableBalance(opposite.getAccount().getAvailableBalance() - amount);
 
-            Transaction debitTransaction = Transaction.builder()
-                    .refNumber(Generator.refNumberGenerator(transactionDate))
-                    .amount(10000D)
-                    .currency("IDR")
-                    .remainingBalance(opposite.getAccount().getAvailableBalance())
-                    .beneficiaryAccountNumber(owner.getAccount().getAccountNumber())
-                    .beneficiaryEmail(owner.getUsername())
-                    .beneficiaryName(owner.getName())
-                    .type(ETransactionType.DEBIT)
-                    .remark("Transfer")
-                    .description("dummy transfer")
-                    .account(opposite.getAccount())
-                    .build();
+                Date transactionDate = new Date();
+                Transaction creditTransaction = Transaction.builder()
+                        .refNumber(Generator.refNumberGenerator(transactionDate))
+                        .amount(amount)
+                        .currency("IDR")
+                        .remainingBalance(owner.getAccount().getAvailableBalance())
+                        .beneficiaryAccountNumber(opposite.getAccount().getAccountNumber())
+                        .beneficiaryEmail(opposite.getUsername())
+                        .beneficiaryName(opposite.getName())
+                        .type(ETransactionType.CREDIT)
+                        .remark(j % 2 == 0 ? "Transfer" : "QR Pay")
+                        .description("dummy transfer")
+                        .account(owner.getAccount())
+                        .build();
 
-            listTransactions.add(creditTransaction);
-            listTransactions.add(debitTransaction);
+                Transaction debitTransaction = Transaction.builder()
+                        .refNumber(Generator.refNumberGenerator(transactionDate))
+                        .amount(amount)
+                        .currency("IDR")
+                        .remainingBalance(opposite.getAccount().getAvailableBalance())
+                        .beneficiaryAccountNumber(owner.getAccount().getAccountNumber())
+                        .beneficiaryEmail(owner.getUsername())
+                        .beneficiaryName(owner.getName())
+                        .type(ETransactionType.DEBIT)
+                        .remark(j % 2 == 0 ? "Transfer" : "QR Pay")
+                        .description("dummy transfer")
+                        .account(opposite.getAccount())
+                        .build();
+
+                listTransactions.add(creditTransaction);
+                listTransactions.add(debitTransaction);
+            }
         }
 
         transactionRepository.saveAll(listTransactions);
-
         log.info("[SUCCESS] Seeds {} records to transactions table", listTransactions.size());
     }
 }
