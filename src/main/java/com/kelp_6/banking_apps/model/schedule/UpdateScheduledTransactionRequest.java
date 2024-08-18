@@ -1,6 +1,8 @@
 package com.kelp_6.banking_apps.model.schedule;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class UpdateScheduledTransactionRequest {
-    @Pattern(regexp = "^$|\\d+", message = "amount must be empty or a numeric value")
+    @Min(value = 0, message = "amount must be a positive number")
     private Double amount;
 
     private String description;
@@ -27,13 +29,13 @@ public class UpdateScheduledTransactionRequest {
     @NotBlank(message = "schedule can't be blank")
     private String schedule;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date startDate;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date endDate;
 
-    private Long numbersTransactions;
+    private Integer numbersTransactions;
 
     @JsonIgnore
     private String scheduleID;

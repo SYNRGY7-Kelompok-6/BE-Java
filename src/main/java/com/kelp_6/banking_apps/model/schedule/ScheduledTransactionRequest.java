@@ -1,9 +1,8 @@
 package com.kelp_6.banking_apps.model.schedule;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,9 +19,10 @@ public class ScheduledTransactionRequest {
     @NotBlank(message = "account number can't be blank")
     @Size(min = 10, max = 10, message = "account number's length must be 10")
     @Pattern(regexp = "\\d++", message = "account number should contain only numbers")
-    private String accountNumber;
+    private String beneficiaryAccountNumber;
 
-    @Pattern(regexp = "^$|\\d+", message = "amount must be empty or a numeric value")
+    @NotNull(message = "amount is required field")
+    @Min(value = 0, message = "amount must be a positive number")
     private Double amount;
 
     private String description;
@@ -30,16 +30,20 @@ public class ScheduledTransactionRequest {
     @NotBlank(message = "frequency can't be blank")
     private String frequency;
 
+    // can be filled with
+    // dd-MM-yyyy (once scheduled)
+    // "senin", "selasa", ..., "minggu" (weekly scheduled)
+    // 1, 2, 3, ... 30, 31 (monthly scheduled)
     @NotBlank(message = "schedule can't be blank")
     private String schedule;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date startDate;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date endDate;
 
-    private Long numbersTransactions;
+    private Integer numbersTransactions;
 
     @JsonIgnore
     private String userID;

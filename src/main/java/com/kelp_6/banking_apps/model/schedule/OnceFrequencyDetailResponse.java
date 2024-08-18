@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SourceAccountResponse {
-    private String accountNumber;
-    private Double availableBalance;
+public class OnceFrequencyDetailResponse implements FrequencyDetail {
+    private String scheduledDate;
+
+    @Override
+    public String getScheduledDate() {
+        return this.scheduledDate;
+    }
 }

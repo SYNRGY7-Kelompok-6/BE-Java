@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.DayOfWeek;
 import java.util.Date;
 import java.util.UUID;
 
@@ -36,23 +37,32 @@ public class ScheduledTransaction extends BaseEntity{
     @Column(nullable = false)
     private Double amount;
 
-    private String description;
-
-    @Column(nullable = false, name = "numbers_transactions")
-    private Long numbersTransactions;
-
-    @Column(nullable = false, name = "numbers_succeed_transactions")
-    private Long numbersSucceedTransactions;
-
     @Column(nullable = false, name = "beneficiary_account_number")
     private String beneficiaryAccountNumber;
 
+    @Column(nullable = false, name = "beneficiary_account_name")
+    private String beneficiaryAccountName;
+
+    private String description;
+
+    @Column(name = "numbers_transactions")
+    private Integer numbersTransactions;
+
+    @Column(name = "numbers_succeed_transactions")
+    private Integer numbersSucceedTransactions;
+
+    // for once schedule
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name = "scheduled_date")
     private Date scheduledDate;
 
+    // for weekly schedule
     @Column(name = "scheduled_day")
-    private String scheduleDay;
+    private DayOfWeek scheduledDay;
+
+    // for monthly schedule
+    @Column(name = "scheduled_date_number")
+    private Integer scheduledDateNumber;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name = "start_date")

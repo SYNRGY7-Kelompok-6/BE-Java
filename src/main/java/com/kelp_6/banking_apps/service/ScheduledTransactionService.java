@@ -13,5 +13,5 @@ public interface ScheduledTransactionService {
     List<ScheduledTransactionResponse> getAllSchedule(String userID);
     DetailScheduledTransactionResponse getScheduleByScheduleID(String scheduleID, String userID);
     ScheduledTransactionResponse updateSchedule(UpdateScheduledTransactionRequest request);
-    ScheduledTransactionResponse cancelSchedule(String scheduleID, String userID);
+    ScheduledTransactionResponse cancelSchedule(String scheduleID, String userID, String pinToken);
 }

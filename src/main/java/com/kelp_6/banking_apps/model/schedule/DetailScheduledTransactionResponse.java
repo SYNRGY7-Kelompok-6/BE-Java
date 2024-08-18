@@ -14,10 +14,6 @@ public class DetailScheduledTransactionResponse {
     private String status;
     private String frequency;
     private Double amount;
-    private String scheduledDate;
-    private String days;
-    private String startDate;
-    private String endDate;
-    private Long numbersTransactions;
+    private FrequencyDetail frequencyDetail;
     private SourceAccountResponse source;
 }
