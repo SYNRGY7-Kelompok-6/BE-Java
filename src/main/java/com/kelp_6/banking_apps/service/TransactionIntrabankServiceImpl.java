@@ -38,8 +38,8 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     public TransferResponse transfer(TransferRequest request) {
 
         if(request.getRemark() == null || !request.getRemark().equalsIgnoreCase("Transfer")){
-            if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QR Transfer")
-                    && !request.getRemark().equalsIgnoreCase("QR Pay"))){
+            if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer")
+                    && !request.getRemark().equalsIgnoreCase("QRIS Pay"))){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown Remark");
             }
         }

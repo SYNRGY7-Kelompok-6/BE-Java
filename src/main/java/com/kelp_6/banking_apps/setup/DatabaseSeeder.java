@@ -232,7 +232,7 @@ public class DatabaseSeeder {
                         .beneficiaryEmail(opposite.getUsername())
                         .beneficiaryName(opposite.getName())
                         .type(ETransactionType.CREDIT)
-                        .remark(j % 2 == 0 ? "Transfer" : "QR Pay")
+                        .remark(j % 2 == 0 ? "Transfer" : "QRIS Transfer")
                         .description("dummy transfer")
                         .account(owner.getAccount())
                         .build();
@@ -246,7 +246,7 @@ public class DatabaseSeeder {
                         .beneficiaryEmail(owner.getUsername())
                         .beneficiaryName(owner.getName())
                         .type(ETransactionType.DEBIT)
-                        .remark(j % 2 == 0 ? "Transfer" : "QR Pay")
+                        .remark(j % 2 == 0 ? "Transfer" : "QRIS Transfer")
                         .description("dummy transfer")
                         .account(opposite.getAccount())
                         .build();
