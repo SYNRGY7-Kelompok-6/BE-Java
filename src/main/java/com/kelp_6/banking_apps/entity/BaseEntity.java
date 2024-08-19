@@ -16,12 +16,12 @@ import java.util.TimeZone;
 public class BaseEntity {
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_date", nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdDate;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(updatable = false)
+    @Column(name = "updated_date")
     @UpdateTimestamp
     private Date updatedDate;
 

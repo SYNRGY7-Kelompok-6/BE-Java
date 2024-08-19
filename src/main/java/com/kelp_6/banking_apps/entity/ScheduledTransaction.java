@@ -54,6 +54,7 @@ public class ScheduledTransaction extends BaseEntity{
     // for once schedule
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name = "scheduled_date")
+    @Temporal(TemporalType.DATE)
     private Date scheduledDate;
 
     // for weekly schedule
@@ -66,10 +67,12 @@ public class ScheduledTransaction extends BaseEntity{
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name = "start_date")
+    @Temporal(TemporalType.DATE)
     private Date startDate;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name = "end_date")
+    @Temporal(TemporalType.DATE)
     private Date endDate;
 
     @ManyToOne
