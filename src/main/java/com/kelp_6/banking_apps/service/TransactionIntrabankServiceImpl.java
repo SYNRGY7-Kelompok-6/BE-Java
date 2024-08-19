@@ -35,9 +35,9 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private final TransactionTokenService transactionTokenService;
 
     @Transactional
-    public TransferResponse transfer(TransferRequest request) {
+    public TransferResponse transfer(TransferRequest request, Boolean isSchedule) {
 
-        if(request.getRemark() == null || !request.getRemark().equalsIgnoreCase("Transfer")){
+        if(request.getRemark() == null || (!request.getRemark().equalsIgnoreCase("Transfer") && !request.getRemark().equalsIgnoreCase("Scheduled Transfer"))){
             if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer") && !request.getRemark().equalsIgnoreCase("QRIS Pay"))){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown Remark");
             }
@@ -50,7 +50,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         Account srcAccount = accountRepository.findByUser(user.getId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "source account number doesn't exists"));
-        if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
+        if (!isSchedule && !this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
         if (request.getBeneficiaryAccountNumber().equals(srcAccount.getAccountNumber())) {

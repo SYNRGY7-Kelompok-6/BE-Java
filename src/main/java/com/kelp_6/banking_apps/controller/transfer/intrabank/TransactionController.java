@@ -32,7 +32,7 @@ public class TransactionController {
         request.setUserID(userDetails.getUsername());
         request.setPinToken(pinToken);
 
-        TransferResponse transferData = this.transactionIntrabankService.transfer(request);
+        TransferResponse transferData = this.transactionIntrabankService.transfer(request, false);
         WebResponse<TransferResponse> response = WebResponse.<TransferResponse>builder()
                 .status("success")
                 .message("funds successfully send")
