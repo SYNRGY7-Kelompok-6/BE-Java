@@ -1,5 +1,6 @@
 package com.kelp_6.banking_apps.repository;
 
+import com.kelp_6.banking_apps.entity.ETransactionType;
 import com.kelp_6.banking_apps.entity.Transaction;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +26,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("endDate") Date endDate,
             Pageable pageable
             );
+
+    @Query("SELECT t FROM Transaction t WHERE t.account.accountNumber = :accountNumber and t.type = :type ORDER BY t.transactionDate DESC")
+    List<Transaction> findAllByAccount_AccountNumberOrderByTransactionDateDesc(
+            @Param("accountNumber") String accountNumber,
+            @Param("type") ETransactionType type,
+            Pageable pageable
+    );
 
     @Modifying
     @Query(value = "delete from transactions", nativeQuery = true)

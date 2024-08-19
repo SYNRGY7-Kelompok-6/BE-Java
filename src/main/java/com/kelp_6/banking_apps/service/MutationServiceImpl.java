@@ -146,4 +146,21 @@ public class MutationServiceImpl implements MutationService{
         return mutationResponseMapper.toMonthlyMutation(transactions);
 
     }
+
+    @Override
+    public List<SimpleTransactionDetailResponse> getLastTwoCreditTransactions(LatestTransactionsRequest request) {
+        User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
+                String.format(" %s doesn't exists", request.getUserID())
+        ));
+
+        Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
+
+        Pageable pageable = PageRequest.of(0, request.getLimit());
+
+        List<Transaction> transactions = transactionRepository
+                .findAllByAccount_AccountNumberOrderByTransactionDateDesc(account.getAccountNumber(), ETransactionType.CREDIT, pageable);
+
+        return mutationResponseMapper.toSimpleTransactionDetailDTOList(transactions,user);
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/bank-statement")
@@ -134,5 +135,23 @@ public class MutationController {
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Cannot Find Month");
         }
+    }
+    @GetMapping("/latest-income")
+    public WebResponse<List<SimpleTransactionDetailResponse>> getLastTwoTransactions(
+            Authentication authentication
+    ) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        LatestTransactionsRequest request = new LatestTransactionsRequest();
+        request.setUserID(userDetails.getUsername());
+        request.setLimit(2);
+
+        List<SimpleTransactionDetailResponse> lastTwoTransactions = mutationService.getLastTwoCreditTransactions(request);
+
+        return WebResponse.<List<SimpleTransactionDetailResponse>>builder()
+                .status("success")
+                .message("Successfully retrieved the last two credit transactions")
+                .data(lastTwoTransactions)
+                .build();
     }
 }

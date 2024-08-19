@@ -7,6 +7,7 @@ import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.model.mutation.*;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class MutationResponseMapper {
+    private SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
     public MutationResponse toDataDTO(Account account, List<Transaction> transactions, BalanceDetailsResponse startingBalance, String endingDateBalance){
         return MutationResponse.builder()
                 .accountInfo(toAccountInfoDTO(account))
@@ -145,6 +148,20 @@ public class MutationResponseMapper {
                 .beneficiaryAccountNumber(transaction.getBeneficiaryAccountNumber())
                 .beneficiaryName(transaction.getBeneficiaryName())
                 .build();
+    }
+    public SimpleTransactionDetailResponse toSimpleTransactionDetailDTO(User user, Transaction transaction) {
+        return SimpleTransactionDetailResponse.builder()
+                .sourceName(user.getName())
+                .amount(transaction.getAmount())
+                .transactionDate(formatter.format(transaction.getTransactionDate()))
+                .build();
+    }
+
+    public List<SimpleTransactionDetailResponse> toSimpleTransactionDetailDTOList(List<Transaction> transactions, User user) {
+        return transactions.stream()
+                .filter(transaction -> transaction.getType() == ETransactionType.CREDIT)
+                .map(transaction -> toSimpleTransactionDetailDTO(user, transaction))
+                .collect(Collectors.toList());
     }
 
     public AccountMonthlyResponse toMonthlyMutation(List<Transaction> transactions) {
