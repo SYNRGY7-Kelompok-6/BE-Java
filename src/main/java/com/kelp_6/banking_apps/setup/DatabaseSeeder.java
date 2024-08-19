@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -24,9 +26,10 @@ public class DatabaseSeeder {
     private final AccountTypeRepository accountTypeRepository;
     private final LoginInfosRepository loginInfosRepository;
     private final SavedAccountsRespository savedAccountsRespository;
+    private final SimpleDateFormat birthFormatter = new SimpleDateFormat("dd-MM-yyyy");
 
     @Transactional
-    public void setup(){
+    public void setup() {
         transactionRepository.hardDeleteAll();
         savedAccountsRespository.hardDeleteAll();
         accountRepository.hardDeleteAll();
@@ -45,6 +48,15 @@ public class DatabaseSeeder {
             calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
             calendar.setTime(new Date());
             calendar.set(Calendar.YEAR, 2027);
+
+            Date birthDate = new Date();
+
+            try {
+                birthDate = birthFormatter.parse("04-08-2002");
+            }catch (ParseException exception){
+                log.error("error while parse birth date");
+            }
+
             User user = User.builder()
                     .name((i == 0) ? "Muh. Sabili" : "Abilsabili")
                     .username("test" + i + "@test.com")
@@ -52,6 +64,10 @@ public class DatabaseSeeder {
                     .isVerified(true)
                     .pin(passwordEncoder.encode("123456"))
                     .pinExpiredDate(calendar.getTime())
+                    .birth(birthDate)
+                    .phone((i==0) ? "0895411255580" : "0895411255582")
+                    .address("Jalan Balongsari No.13, Kecamatan Tandes, Kota Surabaya, Prov. Jawa Timur")
+                    .imageUrl("https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png")
                     .build();
 
             if(i==0) user.setUserID("user001");

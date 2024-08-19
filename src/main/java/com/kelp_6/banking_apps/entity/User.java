@@ -42,6 +42,18 @@ public class User extends BaseEntity{
     @Column(nullable = false, name = "is_verified")
     private boolean isVerified;
 
+    @Column(nullable = false, name = "image_url")
+    private String imageUrl;
+
+    @Column(nullable = false)
+    private String phone;
+
+    @Column(nullable = false)
+    private Date birth;
+
+    @Column(nullable = false)
+    private String address;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Account account;
 

@@ -67,11 +67,8 @@ public class MutationController {
     ) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        fromDate = (fromDate == null) ? new Date() : fromDate;
-        toDate = (toDate == null) ? new Date() : toDate;
-
-        fromDate = DateUtil.getStartOfDay(fromDate);
-        toDate = DateUtil.getEndOfDay(toDate);
+        fromDate = (fromDate == null) ? DateUtil.getStartDayOfMonth(new Date()) : DateUtil.getStartOfDay(fromDate);
+        toDate = (toDate == null) ? DateUtil.getEndDayOfMonth(new Date()) : DateUtil.getEndOfDay(toDate);
 
         MutationRequest request = new MutationRequest();
         request.setUserID(userDetails.getUsername());
