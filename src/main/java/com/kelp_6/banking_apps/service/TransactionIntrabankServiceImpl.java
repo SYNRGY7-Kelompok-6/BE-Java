@@ -4,6 +4,7 @@ import com.kelp_6.banking_apps.entity.Account;
 import com.kelp_6.banking_apps.entity.ETransactionType;
 import com.kelp_6.banking_apps.entity.Transaction;
 import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.model.email.EmailModel;
 import com.kelp_6.banking_apps.model.transfer.intrabank.Amount;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferResponse;
@@ -11,11 +12,14 @@ import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.SavedAccountsRespository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
+import com.kelp_6.banking_apps.service.email.EmailService;
 import com.kelp_6.banking_apps.utils.CurrencyUtil;
 import com.kelp_6.banking_apps.utils.Generator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -34,11 +38,15 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private final ValidationService validationService;
     private final TransactionTokenService transactionTokenService;
 
+    @Autowired
+    private EmailService emailService;
+
+
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
 
-        if(request.getRemark() == null || !request.getRemark().equalsIgnoreCase("Transfer")){
-            if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer") && !request.getRemark().equalsIgnoreCase("QRIS Pay"))){
+        if (request.getRemark() == null || !request.getRemark().equalsIgnoreCase("Transfer")) {
+            if (request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer") && !request.getRemark().equalsIgnoreCase("QRIS Pay"))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown Remark");
             }
         }
@@ -50,6 +58,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         Account srcAccount = accountRepository.findByUser(user.getId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "source account number doesn't exists"));
+
         if (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
@@ -57,7 +66,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't transfer to oneself account");
         }
 
-        if(request.getRemark().equalsIgnoreCase("Transfer") && !savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), request.getBeneficiaryAccountNumber())){
+        if (request.getRemark().equalsIgnoreCase("Transfer") && !savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), request.getBeneficiaryAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "account number not saved");
         }
 
@@ -70,19 +79,23 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .value(srcAccount.getAvailableBalance())
                 .currency(srcAccount.getAvailableBalanceCurr())
                 .build();
+
         // original beneficiary amount before transfer
         Amount benAmount = Amount.builder()
                 .value(benAccount.getAvailableBalance())
                 .currency(benAccount.getAvailableBalanceCurr())
                 .build();
+
         // requested amount in IDR
         Amount reqAmountIDR = CurrencyUtil.convertAmountCurrency(request.getAmount(), "IDR")
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.BAD_REQUEST, "unsupported amount currency"));
+
         // requested amount in source account currency
         Amount reqAmountSRC = CurrencyUtil.convertAmountCurrency(request.getAmount(), srcAmount.getCurrency())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.BAD_REQUEST, "unsupported amount currency"));
+
         // requested amount in beneficiary account currency
         Amount reqAmountBEN = CurrencyUtil.convertAmountCurrency(request.getAmount(), benAmount.getCurrency())
                 .orElseThrow(() ->
@@ -92,6 +105,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         if (reqAmountIDR.getValue() > srcAccount.getAccountType().getTransferLimit()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "transfer limit exceed");
         }
+
         if (srcAmount.getValue() - reqAmountSRC.getValue() < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "insufficient balance");
         }
@@ -100,7 +114,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         double benAccRemainingBalance = benAccount.getAvailableBalance() + reqAmountBEN.getValue();
         Date transactionDate = new Date();
 
-        if(request.getDesc() == null || request.getDesc().isEmpty()){
+        if (request.getDesc() == null || request.getDesc().isEmpty()) {
             request.setDesc(request.getRemark());
         }
 
@@ -119,7 +133,9 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .account(srcAccount)
                 .type(ETransactionType.DEBIT)
                 .build();
+
         this.transactionRepository.save(srcAccountTransaction);
+
         // beneficiary account transaction record
         Transaction benAccountTransaction = Transaction.builder()
                 .refNumber(Generator.refNumberGenerator(transactionDate))
@@ -138,9 +154,26 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         this.transactionRepository.save(benAccountTransaction);
 
         srcAccount.setAvailableBalance(srcAccRemainingBalance);
+
         this.accountRepository.save(srcAccount);
         benAccount.setAvailableBalance(benAccRemainingBalance);
         this.accountRepository.save(benAccount);
+
+        EmailModel emailData = EmailModel.builder()
+                .beneficiaryAccount(benAccount.getAccountNumber())
+                .beneficiaryName(srcAccount.getUser().getName())
+                .amount(request.getAmount())
+                .beneficiaryEmail(benAccount.getUser().getUsername())
+                .sender(srcAccount.getUser().getName())
+                .transactionDate(benAccountTransaction.getTransactionDate())
+                .build();
+
+        try {
+            emailService.notificationIncomingFunds(emailData);
+            log.info("Email notification sent successfully to {}", benAccount.getUser().getUsername());
+        }catch (Exception exception){
+            log.error("Failed to send email notification to {}: {}", benAccount.getUser().getUsername(), exception.getMessage(), exception);
+        }
 
         return TransferResponse.builder()
                 .refNumber(srcAccountTransaction.getRefNumber())
@@ -154,5 +187,6 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .sourceAccountNumber(srcAccount.getAccountNumber())
                 .sourceName(srcAccount.getUser().getName())
                 .build();
+
     }
 }
