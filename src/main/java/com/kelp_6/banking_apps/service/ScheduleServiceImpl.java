@@ -101,5 +101,10 @@ public class ScheduleServiceImpl implements ScheduleService{
             Date nextScheduleDay = DateUtil.getSpecificDate(tomorrow, scheduledTransaction.getScheduledDateNumber());
             scheduledTransaction.setScheduledDate(nextScheduleDay);
         }
+
+        // checker while next schedule day is getting far from endDate (after)
+        if(scheduledTransaction.getScheduledDate().after(scheduledTransaction.getEndDate())){
+            scheduledTransaction.setStatus(EScheduleStatus.SUCCESS);
+        }
     }
 }

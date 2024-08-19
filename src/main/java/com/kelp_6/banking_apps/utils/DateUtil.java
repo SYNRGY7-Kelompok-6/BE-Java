@@ -3,10 +3,7 @@ package com.kelp_6.banking_apps.utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -113,11 +110,18 @@ public class DateUtil {
                 .atZone(zoneId)
                 .toLocalDate();
 
-        if(dayOfMonth >= localStartDate.getDayOfMonth()){
+        if(dayOfMonth >= localStartDate.getDayOfMonth() && localStartDate.lengthOfMonth() >= dayOfMonth){
             return Date.from(localStartDate.withDayOfMonth(dayOfMonth).atStartOfDay(zoneId).toInstant());
         }
 
-        LocalDate dateInNextMonth = localStartDate.plusMonths(1).withDayOfMonth(dayOfMonth);
+        LocalDate dateInNextMonth;
+
+        try {
+            dateInNextMonth = localStartDate.plusMonths(1).withDayOfMonth(dayOfMonth);
+        }catch (DateTimeException exception){
+            dateInNextMonth = localStartDate.plusMonths(2).withDayOfMonth(dayOfMonth);
+        }
+
         return Date.from(dateInNextMonth.atStartOfDay(zoneId).toInstant());
     }
 
