@@ -33,11 +33,8 @@ public class MutationController {
             ) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        fromDate = (fromDate == null) ? new Date() : fromDate;
-        toDate = (toDate == null) ? new Date() : toDate;
-
-        fromDate = DateUtil.getStartOfDay(fromDate);
-        toDate = DateUtil.getEndOfDay(toDate);
+        fromDate = (fromDate == null) ? DateUtil.getStartDayOfMonth(new Date()) : DateUtil.getStartOfDay(fromDate);
+        toDate = (toDate == null) ? DateUtil.getEndDayOfMonth(new Date()) : DateUtil.getEndOfDay(toDate);
 
         MutationRequest request = new MutationRequest();
         request.setUserID(userDetails.getUsername());
@@ -115,7 +112,7 @@ public class MutationController {
     public WebResponse<AccountMonthlyResponse> getMutationMonthly(
             Authentication authentication,
 
-            @RequestParam(value = "month") String months
+            @RequestParam(value = "month", defaultValue = "#{T(java.lang.String).valueOf(T(java.time.LocalDate).now().getMonthValue())}") String months
     ){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 

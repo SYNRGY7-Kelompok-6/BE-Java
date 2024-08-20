@@ -20,12 +20,19 @@ import java.util.UUID;
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
     @Query("SELECT t FROM Transaction t WHERE t.account.accountNumber = :accountNumber AND t.transactionDate BETWEEN :startDate AND :endDate order by t.transactionDate desc")
-    List<Transaction> findAllByAccount_AccountNumberAndBetween(
+    List<Transaction> findAllByAccount_AccountNumberAndBetweenPageable(
             @Param("accountNumber") String accountNumber,
             @Param("startDate") Date startDate,
             @Param("endDate") Date endDate,
             Pageable pageable
             );
+
+    @Query("SELECT t FROM Transaction t WHERE t.account.accountNumber = :accountNumber AND t.transactionDate BETWEEN :startDate AND :endDate order by t.transactionDate asc")
+    List<Transaction> findAllByAccount_AccountNumberAndBetween(
+            @Param("accountNumber") String accountNumber,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
 
     @Query("SELECT t FROM Transaction t WHERE t.account.accountNumber = :accountNumber and t.type = :type ORDER BY t.transactionDate DESC")
     List<Transaction> findAllByAccount_AccountNumberOrderByTransactionDateDesc(

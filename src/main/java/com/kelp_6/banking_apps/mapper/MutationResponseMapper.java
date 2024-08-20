@@ -7,6 +7,7 @@ import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.model.mutation.*;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -84,7 +85,7 @@ public class MutationResponseMapper {
 
     private BalanceDetailsResponse toBalanceDetailDTO(double value, String currency, String dateTime){
         return BalanceDetailsResponse.builder()
-                .value(value)
+                .value(BigDecimal.valueOf(value).doubleValue())
                 .currency(currency)
                 .dateTime(dateTime)
                 .build();
@@ -127,8 +128,8 @@ public class MutationResponseMapper {
 
     private MutationBalanceResponse toMutationBalanceDTO(double value, double remainingBalance, String currency){
         return MutationBalanceResponse.builder()
-                .value(value)
-                .remainingBalance(remainingBalance)
+                .value(BigDecimal.valueOf(value).doubleValue())
+                .remainingBalance(BigDecimal.valueOf(remainingBalance).doubleValue())
                 .currency(currency)
                 .build();
     }
@@ -184,8 +185,6 @@ public class MutationResponseMapper {
         monthlyIncome.setCurrency("IDR");
         monthlyOutcome.setValue(totalOutcome);
         monthlyOutcome.setCurrency("IDR");
-        System.out.println(monthlyIncome.getValue());
-        System.out.println(monthlyOutcome.getValue());
         response.setMonthlyIncome(monthlyIncome);
         response.setMonthlyOutcome(monthlyOutcome);
 
