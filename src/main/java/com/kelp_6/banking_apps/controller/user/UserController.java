@@ -7,6 +7,7 @@ import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,11 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping({"/profile", "/profile/"})
+    @PutMapping(
+            path = {"/profile", "/profile/"},
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public WebResponse<ProfileInfoResponse> updateProfile(
             @Valid @ModelAttribute UpdateProfileInfoRequest request,
             @RequestParam(value = "image", required = false) MultipartFile file,

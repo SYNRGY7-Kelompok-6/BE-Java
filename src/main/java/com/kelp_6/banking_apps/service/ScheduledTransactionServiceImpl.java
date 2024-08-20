@@ -210,6 +210,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
 
         return ScheduledTransactionResponse.builder()
                 .scheduleId(scheduledTransaction.getId().toString())
+                .scheduledDate(simpleDateFormat.format(scheduledTransaction.getScheduledDate()))
                 .status(scheduledTransaction.getStatus().getDescription())
                 .amount(scheduledTransaction.getAmount())
                 .frequency(scheduledTransaction.getFrequency().getDescription())
