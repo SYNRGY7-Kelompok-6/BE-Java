@@ -59,6 +59,11 @@ public class UserServiceImpl implements UserService{
 
         String imageUrl = user.getImageUrl();
         if(file != null){
+            // Validate the content type
+            String contentType = file.getContentType();
+            if (contentType == null || !isImage(contentType)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "only image files are allowed");
+            }
             try {
                 Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
                 imageUrl = (String) uploadResult.get("url");
@@ -88,5 +93,12 @@ public class UserServiceImpl implements UserService{
                 .address(user.getAddress())
                 .imageUrl(user.getImageUrl())
                 .build();
+    }
+
+    private boolean isImage(String contentType) {
+        return contentType.equals("image/png") ||
+                contentType.equals("image/jpeg") ||
+                contentType.equals("image/jpg") ||
+                contentType.equals("image/gif");
     }
 }
