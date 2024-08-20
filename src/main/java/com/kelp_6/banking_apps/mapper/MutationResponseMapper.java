@@ -7,6 +7,8 @@ import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.model.mutation.*;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class MutationResponseMapper {
+    private SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
     public MutationResponse toDataDTO(Account account, List<Transaction> transactions, BalanceDetailsResponse startingBalance, String endingDateBalance){
         return MutationResponse.builder()
                 .accountInfo(toAccountInfoDTO(account))
@@ -81,7 +85,7 @@ public class MutationResponseMapper {
 
     private BalanceDetailsResponse toBalanceDetailDTO(double value, String currency, String dateTime){
         return BalanceDetailsResponse.builder()
-                .value(value)
+                .value(BigDecimal.valueOf(value).doubleValue())
                 .currency(currency)
                 .dateTime(dateTime)
                 .build();
@@ -124,8 +128,8 @@ public class MutationResponseMapper {
 
     private MutationBalanceResponse toMutationBalanceDTO(double value, double remainingBalance, String currency){
         return MutationBalanceResponse.builder()
-                .value(value)
-                .remainingBalance(remainingBalance)
+                .value(BigDecimal.valueOf(value).doubleValue())
+                .remainingBalance(BigDecimal.valueOf(remainingBalance).doubleValue())
                 .currency(currency)
                 .build();
     }
@@ -145,6 +149,20 @@ public class MutationResponseMapper {
                 .beneficiaryAccountNumber(transaction.getBeneficiaryAccountNumber())
                 .beneficiaryName(transaction.getBeneficiaryName())
                 .build();
+    }
+    public SimpleTransactionDetailResponse toSimpleTransactionDetailDTO(User user, Transaction transaction) {
+        return SimpleTransactionDetailResponse.builder()
+                .sourceName(user.getName())
+                .amount(transaction.getAmount())
+                .transactionDate(formatter.format(transaction.getTransactionDate()))
+                .build();
+    }
+
+    public List<SimpleTransactionDetailResponse> toSimpleTransactionDetailDTOList(List<Transaction> transactions, User user) {
+        return transactions.stream()
+                .filter(transaction -> transaction.getType() == ETransactionType.CREDIT)
+                .map(transaction -> toSimpleTransactionDetailDTO(user, transaction))
+                .collect(Collectors.toList());
     }
 
     public AccountMonthlyResponse toMonthlyMutation(List<Transaction> transactions) {
@@ -167,8 +185,6 @@ public class MutationResponseMapper {
         monthlyIncome.setCurrency("IDR");
         monthlyOutcome.setValue(totalOutcome);
         monthlyOutcome.setCurrency("IDR");
-        System.out.println(monthlyIncome.getValue());
-        System.out.println(monthlyOutcome.getValue());
         response.setMonthlyIncome(monthlyIncome);
         response.setMonthlyOutcome(monthlyOutcome);
 

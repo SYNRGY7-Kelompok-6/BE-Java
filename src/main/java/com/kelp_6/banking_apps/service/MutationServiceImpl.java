@@ -6,6 +6,7 @@ import com.kelp_6.banking_apps.entity.Transaction;
 import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.mapper.MutationResponseMapper;
 import com.kelp_6.banking_apps.model.mutation.*;
+import com.kelp_6.banking_apps.model.schedule.SourceAccountResponse;
 import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
@@ -32,7 +33,7 @@ public class MutationServiceImpl implements MutationService{
     private final TransactionRepository transactionRepository;
     private final MutationResponseMapper mutationResponseMapper;
     private final TransactionTokenService transactionTokenService;
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private final SimpleDateFormat formatter;
 
     @Override
     public MutationResponse getMutation(MutationRequest request) {
@@ -42,14 +43,15 @@ public class MutationServiceImpl implements MutationService{
                 String.format(" %s doesn't exists", request.getUserID())
         ));
         Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
-        List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
+        List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetweenPageable(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
+        List<Transaction> calculateTransactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate());
 
-        BalanceDetailsResponse startingBalance = calculateStartingBalance(account.getAvailableBalance(), transactions, user.getCreatedDate());
+        BalanceDetailsResponse startingBalance = calculateStartingBalance(account.getAvailableBalance(), calculateTransactions, (!calculateTransactions.isEmpty()) ? calculateTransactions.get(0).getTransactionDate() : user.getCreatedDate());
 
         String endingDateBalance = formatter.format(new Date());
 
-        if(!transactions.isEmpty()){
-            endingDateBalance = formatter.format(transactions.get(0).getTransactionDate());
+        if(!calculateTransactions.isEmpty()){
+            endingDateBalance = formatter.format(calculateTransactions.get(calculateTransactions.size() - 1).getTransactionDate());
         }
 
         return mutationResponseMapper.toDataDTO(account, transactions, startingBalance, endingDateBalance);
@@ -68,7 +70,7 @@ public class MutationServiceImpl implements MutationService{
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
 
-        List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetween(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
+        List<Transaction> transactions = transactionRepository.findAllByAccount_AccountNumberAndBetweenPageable(account.getAccountNumber(), request.getFromDate(), request.getToDate(), pageable);
 
         return mutationResponseMapper.toMutationsDataDTO(transactions);
     }
@@ -76,7 +78,6 @@ public class MutationServiceImpl implements MutationService{
 
     private BalanceDetailsResponse calculateStartingBalance(double availableBalance, List<Transaction> transactions, Date startBalanceDate){
         double startBalance = availableBalance;
-        Date startDate = startBalanceDate;
         String startCurr = "IDR";
         for (Transaction transaction : transactions){
             if(transaction.getType() == ETransactionType.CREDIT){
@@ -84,11 +85,10 @@ public class MutationServiceImpl implements MutationService{
             }else if(transaction.getType() == ETransactionType.DEBIT){
                 startBalance += transaction.getAmount();
             }
-            startDate = transaction.getTransactionDate();
             startCurr = transaction.getCurrency();
         }
         return BalanceDetailsResponse.builder()
-                .dateTime(formatter.format(startDate))
+                .dateTime(formatter.format(startBalanceDate))
                 .value(startBalance)
                 .currency(startCurr)
                 .build();
@@ -145,5 +145,32 @@ public class MutationServiceImpl implements MutationService{
 
         return mutationResponseMapper.toMonthlyMutation(transactions);
 
+    }
+
+    @Override
+    public List<SimpleTransactionDetailResponse> getLastTwoCreditTransactions(LatestTransactionsRequest request) {
+        User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
+                String.format(" %s doesn't exists", request.getUserID())
+        ));
+
+        Account account = accountRepository.findAccountByAccountNumberAndByUser_Username(user.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "account number doesn't exists"));
+
+        Pageable pageable = PageRequest.of(0, request.getLimit());
+
+        List<Transaction> transactions = transactionRepository
+                .findAllByAccount_AccountNumberOrderByTransactionDateDesc(account.getAccountNumber(), ETransactionType.CREDIT, pageable);
+
+        return mutationResponseMapper.toSimpleTransactionDetailDTOList(transactions,user);
+    }
+
+    @Override
+    public SourceAccountResponse getSourceAccountBalance(String userID) {
+        User user = userRepository.findByUserID(userID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
+        return SourceAccountResponse.builder()
+                .accountNumber(user.getAccount().getAccountNumber())
+                .availableBalance(user.getAccount().getAvailableBalance())
+                .build();
     }
 }

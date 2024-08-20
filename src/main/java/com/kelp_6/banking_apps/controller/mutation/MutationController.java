@@ -1,6 +1,7 @@
 package com.kelp_6.banking_apps.controller.mutation;
 
 import com.kelp_6.banking_apps.model.mutation.*;
+import com.kelp_6.banking_apps.model.schedule.SourceAccountResponse;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.MutationService;
 import com.kelp_6.banking_apps.utils.DateUtil;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/bank-statement")
@@ -32,11 +34,8 @@ public class MutationController {
             ) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        fromDate = (fromDate == null) ? new Date() : fromDate;
-        toDate = (toDate == null) ? new Date() : toDate;
-
-        fromDate = DateUtil.getStartOfDay(fromDate);
-        toDate = DateUtil.getEndOfDay(toDate);
+        fromDate = (fromDate == null) ? DateUtil.getStartDayOfMonth(new Date()) : DateUtil.getStartOfDay(fromDate);
+        toDate = (toDate == null) ? DateUtil.getEndDayOfMonth(new Date()) : DateUtil.getEndOfDay(toDate);
 
         MutationRequest request = new MutationRequest();
         request.setUserID(userDetails.getUsername());
@@ -66,11 +65,8 @@ public class MutationController {
     ) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        fromDate = (fromDate == null) ? new Date() : fromDate;
-        toDate = (toDate == null) ? new Date() : toDate;
-
-        fromDate = DateUtil.getStartOfDay(fromDate);
-        toDate = DateUtil.getEndOfDay(toDate);
+        fromDate = (fromDate == null) ? DateUtil.getStartDayOfMonth(new Date()) : DateUtil.getStartOfDay(fromDate);
+        toDate = (toDate == null) ? DateUtil.getEndDayOfMonth(new Date()) : DateUtil.getEndOfDay(toDate);
 
         MutationRequest request = new MutationRequest();
         request.setUserID(userDetails.getUsername());
@@ -117,7 +113,7 @@ public class MutationController {
     public WebResponse<AccountMonthlyResponse> getMutationMonthly(
             Authentication authentication,
 
-            @RequestParam(value = "month") String months
+            @RequestParam(value = "month", defaultValue = "#{T(java.lang.String).valueOf(T(java.time.LocalDate).now().getMonthValue())}") String months
     ){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -134,5 +130,34 @@ public class MutationController {
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Cannot Find Month");
         }
+    }
+    @GetMapping("/latest-income")
+    public WebResponse<List<SimpleTransactionDetailResponse>> getLastTwoTransactions(
+            Authentication authentication
+    ) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        LatestTransactionsRequest request = new LatestTransactionsRequest();
+        request.setUserID(userDetails.getUsername());
+        request.setLimit(2);
+
+        List<SimpleTransactionDetailResponse> lastTwoTransactions = mutationService.getLastTwoCreditTransactions(request);
+
+        return WebResponse.<List<SimpleTransactionDetailResponse>>builder()
+                .status("success")
+                .message("Successfully retrieved the last two credit transactions")
+                .data(lastTwoTransactions)
+                .build();
+    }
+
+    @GetMapping("/my-account")
+    public WebResponse<SourceAccountResponse> getSourceAccountBalance(Authentication authentication){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        SourceAccountResponse sourceAccountResponse = mutationService.getSourceAccountBalance(userDetails.getUsername());
+        return WebResponse.<SourceAccountResponse>builder()
+                .status("success")
+                .message("account balance and number retrieved successfully")
+                .data(sourceAccountResponse)
+                .build();
     }
 }

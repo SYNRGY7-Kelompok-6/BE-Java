@@ -59,4 +59,7 @@ public class Account extends BaseEntity{
 
     @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
     private List<SavedAccounts> savedAccounts;
+
+    @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
+    private List<ScheduledTransaction> scheduledTransactions;
 }
