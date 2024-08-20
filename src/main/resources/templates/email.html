@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemberitahuan Dana Masuk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #0073e6;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .content p {
+            margin: 0 0 10px;
+            line-height: 1.6;
+        }
+        .content .amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0073e6;
+        }
+        .footer {
+            padding-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+        .footer a {
+            color: #0073e6;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>Pemberitahuan Dana Masuk</h1>
+    </div>
+    <div class="content">
+        <p>Yth. <strong>${benname}</strong>,</p>
+        <p>Kami dengan senang hati menginformasikan bahwa dana sebesar <span class="amount">${amount}</span> telah masuk ke rekening Anda dengan nomor akhir <strong>${benaccount}</strong> pada tanggal <strong>${date}</strong>.</p>
+        <p><strong>Detail:</strong></p>
+        <p>Jumlah: <span class="amount">${amount}</span></p>
+        <p>Dari: <strong>${srcname}</strong></p>
+        <p>Tanggal: <strong>${date}</strong></p>
+        <p>Anda dapat melihat detail transaksi ini di aplikasi mobile banking Anda. Jika Anda memiliki pertanyaan atau memerlukan bantuan lebih lanjut, silakan hubungi layanan pelanggan kami melalui email inikel6synrgy@gmail.com.</p>
+    </div>
+    <div class="footer">
+        <p>Terima kasih telah menggunakan layanan kami!</p>
+        <p>Connect</p>
+    </div>
+</div>
+</body>
+</html>

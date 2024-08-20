@@ -24,10 +24,12 @@ public class TransactionController {
             path = {"", "/"},
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+
     public ResponseEntity<WebResponse<TransferResponse>> transfer(
             Authentication authentication,
             @RequestHeader("X-PIN-TOKEN") String pinToken,
             @RequestBody @Valid TransferRequest request) {
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         request.setUserID(userDetails.getUsername());
         request.setPinToken(pinToken);

@@ -4,6 +4,7 @@ import com.kelp_6.banking_apps.entity.Account;
 import com.kelp_6.banking_apps.entity.ETransactionType;
 import com.kelp_6.banking_apps.entity.Transaction;
 import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.model.email.EmailModel;
 import com.kelp_6.banking_apps.model.transfer.intrabank.Amount;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferResponse;
@@ -11,11 +12,14 @@ import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.SavedAccountsRespository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
+import com.kelp_6.banking_apps.service.email.EmailService;
 import com.kelp_6.banking_apps.utils.CurrencyUtil;
 import com.kelp_6.banking_apps.utils.Generator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,8 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private final ValidationService validationService;
     private final TransactionTokenService transactionTokenService;
 
+    @Autowired
+    private EmailService emailService;
     @Transactional
     public TransferResponse transfer(TransferRequest request, Boolean isSchedule) {
 
@@ -57,7 +63,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "can't transfer to oneself account");
         }
 
-        if(request.getRemark().equalsIgnoreCase("Transfer") && !savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), request.getBeneficiaryAccountNumber())){
+        if (request.getRemark().equalsIgnoreCase("Transfer") && !savedAccountsRespository.existsByUser_IdAndAccount_AccountNumber(user.getId(), request.getBeneficiaryAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "account number not saved");
         }
 
@@ -142,6 +148,22 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         benAccount.setAvailableBalance(benAccRemainingBalance);
         this.accountRepository.save(benAccount);
 
+        EmailModel emailData = EmailModel.builder()
+                .beneficiaryAccount(benAccount.getAccountNumber())
+                .beneficiaryName(srcAccount.getUser().getName())
+                .amount(request.getAmount())
+                .beneficiaryEmail(benAccount.getUser().getUsername())
+                .sender(srcAccount.getUser().getName())
+                .transactionDate(benAccountTransaction.getTransactionDate())
+                .build();
+
+        try {
+            emailService.notificationIncomingFunds(emailData);
+            log.info("Email notification sent successfully to {}", benAccount.getUser().getUsername());
+        }catch (Exception exception){
+            log.error("Failed to send email notification to {}: {}", benAccount.getUser().getUsername(), exception.getMessage(), exception);
+        }
+
         return TransferResponse.builder()
                 .refNumber(srcAccountTransaction.getRefNumber())
                 .transactionId(srcAccountTransaction.getId().toString())
@@ -154,5 +176,6 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .sourceAccountNumber(srcAccount.getAccountNumber())
                 .sourceName(srcAccount.getUser().getName())
                 .build();
+
     }
 }
