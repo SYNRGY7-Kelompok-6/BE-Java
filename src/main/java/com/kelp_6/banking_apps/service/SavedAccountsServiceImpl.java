@@ -78,7 +78,7 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
-        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(savedBeneficiaryId, user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "beneficiary account not found"));
+        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(savedBeneficiaryId, user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "saved account not found"));
 
         return SavedAccountsResponse.builder()
                 .savedBeneficiaryId(savedAccount.getId().toString())
@@ -105,5 +105,16 @@ public class SavedAccountsServiceImpl implements SavedAccountsService {
                 .beneficiaryAccountNumber(savedAccount.getAccount().getAccountNumber())
                 .favorite(savedAccount.getFavorite())
                 .build();
+    }
+
+    @Override
+    public void deleteSavedAccount(SavedAccountsRequest request) {
+        UUID savedBeneficiaryUUID = UuidUtil.convertStringIntoUUID(request.getSavedBeneficiaryId());
+
+        User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
+        SavedAccounts savedAccount = savedAccountsRespository.findByIdAndUser_Id(savedBeneficiaryUUID, user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "saved account not found"));
+
+        savedAccountsRespository.delete(savedAccount);
     }
 }

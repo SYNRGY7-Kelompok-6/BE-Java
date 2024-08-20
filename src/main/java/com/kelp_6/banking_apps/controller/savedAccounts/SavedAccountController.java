@@ -113,4 +113,28 @@ public class SavedAccountController {
                 .data(updatedSavedAccountsResponse)
                 .build();
     }
+
+    @DeleteMapping(
+            value = {"/{savedBeneficiaryId}", "/{savedBeneficiaryId}/"},
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<String> deleteSavedAccount(
+            @PathVariable("savedBeneficiaryId") String savedBeneficiaryId,
+            Authentication authentication
+    ){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        SavedAccountsRequest request = SavedAccountsRequest.builder()
+                .savedBeneficiaryId(savedBeneficiaryId)
+                .userID(userDetails.getUsername())
+                .build();
+
+        savedAccountsService.deleteSavedAccount(request);
+
+        return WebResponse.<String>builder()
+                .status("success")
+                .message("saved account deleted successfully")
+                .data("deleted")
+                .build();
+    }
 }

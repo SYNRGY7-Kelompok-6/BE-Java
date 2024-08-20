@@ -38,4 +38,8 @@ public class Generator {
                 Generator.fourDigitNumberGenerator(),
                 "4");
     }
+
+    public static Integer numberRangeGenerator(int from, int to) {
+        return (int) ((Math.random() * (to - from)) + from);
+    }
 }

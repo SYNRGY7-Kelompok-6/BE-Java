@@ -6,6 +6,7 @@ import com.kelp_6.banking_apps.utils.StringsUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -101,6 +103,16 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler({FileSizeLimitExceededException.class, MaxUploadSizeExceededException.class})
+    public ResponseEntity<WebResponse<Object>> fileSizeLimitExceededException(FileSizeLimitExceededException exception){
+        WebResponse<Object> response = WebResponse.<Object>builder()
+                .status("error")
+                .message("The file size exceeds the maximum allowed limit!")
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)

@@ -24,15 +24,17 @@ public class TransactionController {
             path = {"", "/"},
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+
     public ResponseEntity<WebResponse<TransferResponse>> transfer(
             Authentication authentication,
             @RequestHeader("X-PIN-TOKEN") String pinToken,
             @RequestBody @Valid TransferRequest request) {
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         request.setUserID(userDetails.getUsername());
         request.setPinToken(pinToken);
 
-        TransferResponse transferData = this.transactionIntrabankService.transfer(request);
+        TransferResponse transferData = this.transactionIntrabankService.transfer(request, false);
         WebResponse<TransferResponse> response = WebResponse.<TransferResponse>builder()
                 .status("success")
                 .message("funds successfully send")

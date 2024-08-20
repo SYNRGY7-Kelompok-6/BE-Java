@@ -11,4 +11,5 @@ public interface SavedAccountsService {
     List<SavedAccountsResponse> getAllSavedAccounts(SavedAccountsRequest request);
     SavedAccountsResponse getSavedAccount(SavedAccountsRequest request);
     SavedAccountsResponse updateSavedAccount(UpdateSavedAccountRequest request);
+    void deleteSavedAccount(SavedAccountsRequest request);
 }
