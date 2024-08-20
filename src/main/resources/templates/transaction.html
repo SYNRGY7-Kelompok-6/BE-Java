@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Bayar Payment Confirmation</title>
+    <style type="text/css">
+        @page {
+            margin: 0
+        }
+        body {
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            margin: 0;
+            background-color: #1a1a1a;
+            padding: 20px;
+        }
+        .container {
+            width: 350px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+        }
+        .content {
+            border: 1px solid #a0a0a0;
+            padding: 12px;
+        }
+        #total-transaction {
+            padding-top: 8px;
+            border-top: 1px solid #a0a0a0;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .qr-icon {
+            width: 30px;
+            height: 30px;
+            background-color: #ffffff;
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-size: 18px;
+            margin-top: 32px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 14px;
+            margin: 0;
+        }
+        .detail {
+            margin-bottom: 15px;
+        }
+        #source-name {
+            margin-top: 24px;
+        }
+        .label {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+        #date {
+            margin-top: 8px;
+        }
+        .value {
+            font-size: 14px;
+        }
+        .total {
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="qr-icon"></div>
+        <h1 th:text="${transactionStatus}">Transaksi berhasil</h1>
+        <div class="label" id="date" th:text="${transactionDate}">11 Jul 2024 15:32:06 WIB</div>
+        <div class="label" th:text="'No. Ref: ' + ${transactionReference}">No. Ref: 241824123124y11231</div>
+    </div>
+    <div class="content">
+        <div class="detail">
+            <div class="label">Penerima</div>
+            <div class="value" th:text="${recipientName}">NABILA MAZAYA</div>
+        </div>
+        <div class="detail">
+            <div class="label">No. Rekening</div>
+            <div class="value" th:text="${accountNumber}">567805843170</div>
+        </div>
+        <div class="detail" id="total-transaction">
+            <div class="label" style="float: left;">Total Transaksi</div>
+            <div class="value total" style="float: right;" th:text="${currencySymbol} + ${transactionAmount}">Rp150.000</div>
+            <div style="clear: both;"></div>
+        </div>
+        <div class="detail" id="source-name">
+            <div class="label">Sumber Dana</div>
+            <div class="value" th:text="${sourceName}">NIA MILLATUL IZZA</div>
+        </div>
+        <div class="detail">
+            <div class="label">No. Rekening</div>
+            <div class="value" th:text="${sourceAccountNumber}">567805843170</div>
+        </div>
+        <div class="detail">
+            <div class="label">Remark</div>
+            <div class="value" th:text="${remark}">Transfer</div>
+        </div>
+        <div class="detail">
+            <div class="label">Deskripsi</div>
+            <div class="value" th:text="${description}">Ini dummy transfer</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
