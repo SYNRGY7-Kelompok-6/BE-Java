@@ -1,6 +1,7 @@
 package com.kelp_6.banking_apps.service;
 
 import com.kelp_6.banking_apps.model.mutation.*;
+import com.kelp_6.banking_apps.model.schedule.SourceAccountResponse;
 
 import java.util.List;
 public interface MutationService {
@@ -13,5 +14,7 @@ public interface MutationService {
     AccountMonthlyResponse getMonthlyMutation(int month, String username);
 
     List<SimpleTransactionDetailResponse> getLastTwoCreditTransactions(LatestTransactionsRequest request);
+
+    SourceAccountResponse getSourceAccountBalance(String userID);
 
 }

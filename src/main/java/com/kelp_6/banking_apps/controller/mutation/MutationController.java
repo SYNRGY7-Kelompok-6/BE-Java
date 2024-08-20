@@ -1,6 +1,7 @@
 package com.kelp_6.banking_apps.controller.mutation;
 
 import com.kelp_6.banking_apps.model.mutation.*;
+import com.kelp_6.banking_apps.model.schedule.SourceAccountResponse;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.MutationService;
 import com.kelp_6.banking_apps.utils.DateUtil;
@@ -146,6 +147,17 @@ public class MutationController {
                 .status("success")
                 .message("Successfully retrieved the last two credit transactions")
                 .data(lastTwoTransactions)
+                .build();
+    }
+
+    @GetMapping("/my-account")
+    public WebResponse<SourceAccountResponse> getSourceAccountBalance(Authentication authentication){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        SourceAccountResponse sourceAccountResponse = mutationService.getSourceAccountBalance(userDetails.getUsername());
+        return WebResponse.<SourceAccountResponse>builder()
+                .status("success")
+                .message("account balance and number retrieved successfully")
+                .data(sourceAccountResponse)
                 .build();
     }
 }

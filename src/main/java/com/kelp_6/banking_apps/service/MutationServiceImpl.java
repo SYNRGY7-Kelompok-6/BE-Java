@@ -6,6 +6,7 @@ import com.kelp_6.banking_apps.entity.Transaction;
 import com.kelp_6.banking_apps.entity.User;
 import com.kelp_6.banking_apps.mapper.MutationResponseMapper;
 import com.kelp_6.banking_apps.model.mutation.*;
+import com.kelp_6.banking_apps.model.schedule.SourceAccountResponse;
 import com.kelp_6.banking_apps.repository.AccountRepository;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
@@ -161,5 +162,15 @@ public class MutationServiceImpl implements MutationService{
                 .findAllByAccount_AccountNumberOrderByTransactionDateDesc(account.getAccountNumber(), ETransactionType.CREDIT, pageable);
 
         return mutationResponseMapper.toSimpleTransactionDetailDTOList(transactions,user);
+    }
+
+    @Override
+    public SourceAccountResponse getSourceAccountBalance(String userID) {
+        User user = userRepository.findByUserID(userID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+
+        return SourceAccountResponse.builder()
+                .accountNumber(user.getAccount().getAccountNumber())
+                .availableBalance(user.getAccount().getAvailableBalance())
+                .build();
     }
 }
