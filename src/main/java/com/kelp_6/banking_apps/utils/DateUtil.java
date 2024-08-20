@@ -4,10 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.*;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 public class DateUtil {
     private static final ZoneId zoneId = ZoneId.of("Asia/Jakarta");
@@ -133,5 +130,10 @@ public class DateUtil {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
+    }
+
+    public static Date getCurrentDateInJakartaTimeZone() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Jakarta"));
+        return calendar.getTime();
     }
 }

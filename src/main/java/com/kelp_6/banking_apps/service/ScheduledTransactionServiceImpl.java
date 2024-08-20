@@ -437,7 +437,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         if(request.getStartDate() == null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "start date can't be null");
         }
-        if(request.getStartDate().before(DateUtil.removeTime(new Date()))){
+        if(request.getStartDate().before(DateUtil.removeTime(DateUtil.getCurrentDateInJakartaTimeZone()))){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "start date can't be in the past");
         }
 
@@ -445,7 +445,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         if(request.getEndDate() == null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "end date can't be null");
         }
-        if(request.getEndDate().before(DateUtil.removeTime(new Date()))){
+        if(request.getEndDate().before(DateUtil.removeTime(DateUtil.getCurrentDateInJakartaTimeZone()))){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "start date can't be in the past");
         }
         if(request.getEndDate().before(request.getStartDate())){
@@ -468,7 +468,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         if(request.getStartDate() == null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "start date can't be null");
         }
-        if(request.getStartDate().before(DateUtil.removeTime(new Date()))){
+        if(request.getStartDate().before(DateUtil.removeTime(DateUtil.getCurrentDateInJakartaTimeZone()))){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "start date can't be in the past");
         }
 
@@ -476,7 +476,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         if(request.getEndDate() == null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "end date can't be null");
         }
-        if(request.getEndDate().before(DateUtil.removeTime(new Date()))){
+        if(request.getEndDate().before(DateUtil.removeTime(DateUtil.getCurrentDateInJakartaTimeZone()))){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "start date can't be in the past");
         }
         if(request.getEndDate().before(request.getStartDate())){
