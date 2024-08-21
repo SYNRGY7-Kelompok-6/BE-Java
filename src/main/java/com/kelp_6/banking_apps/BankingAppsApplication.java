@@ -3,6 +3,7 @@ package com.kelp_6.banking_apps;
 import com.kelp_6.banking_apps.setup.DatabaseSeeder;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -21,9 +22,11 @@ public class BankingAppsApplication {
 				.run(BankingAppsApplication.class, args)
 				.getBean(DatabaseSeeder.class);
 
-		TimeZone.setDefault(TimeZone.getTimeZone("GMT+7:00"));
-
 		seeder.setup();
 	}
 
+	@PostConstruct
+	public void init() {
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT+7:00"));
+	}
 }
