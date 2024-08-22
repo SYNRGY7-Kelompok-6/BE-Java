@@ -9,8 +9,8 @@ import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.DateUtil;
 import com.kelp_6.banking_apps.utils.UuidUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,8 +26,8 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ScheduledTransactionServiceImpl implements ScheduledTransactionService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ScheduledTransactionServiceImpl.class);
     private final ScheduledTransactionRepository scheduledTransactionRepository;
     private final TransactionTokenService transactionTokenService;
     private final UserRepository userRepository;
@@ -38,7 +38,8 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     @Override
     @Transactional
     public ScheduledTransactionResponse createSchedule(ScheduledTransactionRequest request) {
-        log.info("service - ScheduledTransactionServiceImpl - createSchedule - accessed");
+        LOGGER.info("accessed");
+
         // user checker
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
                 String.format(" %s doesn't exists", request.getUserID())
@@ -104,7 +105,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
 
     @Override
     public List<ScheduledTransactionResponse> getAllSchedule(String userID) {
-        log.info("service - ScheduledTransactionServiceImpl - getAllSchedule - accessed");
+        LOGGER.info("accessed");
 
         // user checker
         User user = userRepository.findByUserID(userID).orElseThrow(() -> new UsernameNotFoundException(
@@ -125,7 +126,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
 
     @Override
     public DetailScheduledTransactionResponse getScheduleByScheduleID(String scheduleID, String userID) {
-        log.info("service - ScheduledTransactionServiceImpl - getScheduleByScheduleID - accessed");
+        LOGGER.info("accessed");
 
         // user checker
         User user = userRepository.findByUserID(userID).orElseThrow(() -> new UsernameNotFoundException(
@@ -162,7 +163,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     @Override
     @Transactional
     public ScheduledTransactionResponse updateSchedule(UpdateScheduledTransactionRequest request) {
-        log.info("service - ScheduledTransactionServiceImpl - updateSchedule - accessed");
+        LOGGER.info("accessed");
 
         // user checker
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
@@ -220,7 +221,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
 
     @Override
     public ScheduledTransactionResponse cancelSchedule(String scheduleID, String userID, String pinToken) {
-        log.info("service - ScheduledTransactionServiceImpl - cancelSchedule - accessed");
+        LOGGER.info("accessed");
 
         // user checker
         User user = userRepository.findByUserID(userID).orElseThrow(() -> new UsernameNotFoundException(
@@ -263,7 +264,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private ScheduledTransaction getOnceSchedule(ScheduledTransactionRequest request, Account srcAccount){
-        log.info("service - ScheduledTransactionServiceImpl - getOnceSchedule - accessed");
+        LOGGER.info("accessed");
 
         // parsing schedule
         Date schedule;
@@ -288,7 +289,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private ScheduledTransaction getWeeklySchedule(ScheduledTransactionRequest request, Account srcAccount){
-        log.info("service - ScheduledTransactionServiceImpl - getWeeklySchedule - accessed");
+        LOGGER.info("accessed");
 
         weeklyAndMontlyRequestChecker(request);
 
@@ -312,7 +313,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private ScheduledTransaction getMonthlySchedule(ScheduledTransactionRequest request, Account srcAccount){
-        log.info("service - ScheduledTransactionServiceImpl - getMonthlySchedule - accessed");
+        LOGGER.info("accessed");
 
         weeklyAndMontlyRequestChecker(request);
 
@@ -346,7 +347,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private void getOnceScheduleUpdate(UpdateScheduledTransactionRequest request, ScheduledTransaction scheduledTransaction){
-        log.info("service - ScheduledTransactionServiceImpl - getOnceSchedule - accessed");
+        LOGGER.info("accessed");
 
         // parsing schedule
         Date schedule;
@@ -372,7 +373,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private void getWeeklyScheduleUpdate(UpdateScheduledTransactionRequest request, ScheduledTransaction scheduledTransaction){
-        log.info("service - ScheduledTransactionServiceImpl - getWeeklySchedule - accessed");
+        LOGGER.info("accessed");
 
         weeklyAndMontlyRequestCheckerUpdate(request);
 
@@ -393,7 +394,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private void getMonthlyScheduleUpdate(UpdateScheduledTransactionRequest request, ScheduledTransaction scheduledTransaction){
-        log.info("service - ScheduledTransactionServiceImpl - getMonthlySchedule - accessed");
+        LOGGER.info("accessed");
 
         weeklyAndMontlyRequestCheckerUpdate(request);
 
@@ -424,7 +425,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private void weeklyAndMontlyRequestChecker(ScheduledTransactionRequest request){
-        log.info("service - ScheduledTransactionServiceImpl - weeklyAndMontlyRequestChecker - accessed");
+        LOGGER.info("accessed");
 
         // numbers transactions checker
         if(request.getNumbersTransactions() == null){
@@ -455,7 +456,7 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private void weeklyAndMontlyRequestCheckerUpdate(UpdateScheduledTransactionRequest request){
-        log.info("service - ScheduledTransactionServiceImpl - weeklyAndMontlyRequestChecker - accessed");
+        LOGGER.info("accessed");
 
         // numbers transactions checker
         if(request.getNumbersTransactions() == null){
@@ -486,6 +487,8 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     }
 
     private FrequencyDetail getFrequencyDetail(ScheduledTransaction scheduledTransaction){
+        LOGGER.info("accessed");
+
         return switch (scheduledTransaction.getFrequency()) {
             case ONCE -> OnceFrequencyDetailResponse.builder()
                     .scheduledDate(simpleDateFormat.format(scheduledTransaction.getScheduledDate()))

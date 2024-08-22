@@ -7,6 +7,8 @@ import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,10 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
     @GetMapping({"/profile", "/profile/"})
     public WebResponse<ProfileInfoResponse> getProfile(Authentication authentication){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         ProfileInfoRequest request = ProfileInfoRequest.builder()
@@ -46,6 +51,8 @@ public class UserController {
             @RequestParam(value = "image", required = false) MultipartFile file,
             Authentication authentication
     ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         ProfileInfoResponse profileInfoResponse = userService.updateProfile(request, file, userDetails.getUsername());

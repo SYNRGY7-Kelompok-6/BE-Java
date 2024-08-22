@@ -17,9 +17,9 @@ import com.kelp_6.banking_apps.utils.CurrencyUtil;
 import com.kelp_6.banking_apps.utils.Generator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -27,10 +27,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionIntrabankServiceImpl implements TransactionIntrabankService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(TransactionIntrabankServiceImpl.class);
+
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final SavedAccountsRespository savedAccountsRespository;
@@ -42,6 +43,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private EmailService emailService;
     @Transactional
     public TransferResponse transfer(TransferRequest request, Boolean isSchedule) {
+        LOGGER.info("accessed");
 
         if(request.getRemark() == null || (!request.getRemark().equalsIgnoreCase("Transfer") && !request.getRemark().equalsIgnoreCase("Scheduled Transfer"))){
             if(request.getRemark() != null && (!request.getRemark().equalsIgnoreCase("QRIS Transfer") && !request.getRemark().equalsIgnoreCase("QRIS Pay"))){
@@ -159,9 +161,9 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
 
         try {
             emailService.notificationIncomingFunds(emailData);
-            log.info("Email notification sent successfully to {}", benAccount.getUser().getUsername());
+            LOGGER.info("Email notification sent successfully to {}", benAccount.getUser().getUsername());
         }catch (Exception exception){
-            log.error("Failed to send email notification to {}: {}", benAccount.getUser().getUsername(), exception.getMessage(), exception);
+            LOGGER.error("Failed to send email notification to {}: {}", benAccount.getUser().getUsername(), exception.getMessage(), exception);
         }
 
         return TransferResponse.builder()

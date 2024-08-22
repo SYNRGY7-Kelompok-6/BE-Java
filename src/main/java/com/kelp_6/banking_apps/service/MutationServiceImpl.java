@@ -12,6 +12,8 @@ import com.kelp_6.banking_apps.repository.TransactionRepository;
 import com.kelp_6.banking_apps.repository.UserRepository;
 import com.kelp_6.banking_apps.utils.UuidUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MutationServiceImpl implements MutationService{
+    private final static Logger LOGGER = LoggerFactory.getLogger(MutationServiceImpl.class);
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
@@ -37,6 +40,8 @@ public class MutationServiceImpl implements MutationService{
 
     @Override
     public MutationResponse getMutation(MutationRequest request) {
+        LOGGER.info("accessed");
+
         Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize());
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
@@ -59,6 +64,8 @@ public class MutationServiceImpl implements MutationService{
 
     @Override
     public MutationsOnlyResponse getMutationsOnly(MutationRequest request) {
+        LOGGER.info("accessed");
+
         Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize());
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
@@ -77,6 +84,8 @@ public class MutationServiceImpl implements MutationService{
 
 
     private BalanceDetailsResponse calculateStartingBalance(double availableBalance, List<Transaction> transactions, Date startBalanceDate){
+        LOGGER.info("accessed");
+
         double startBalance = availableBalance;
         String startCurr = "IDR";
         for (Transaction transaction : transactions){
@@ -96,6 +105,7 @@ public class MutationServiceImpl implements MutationService{
 
     @Override
     public TransactionDetailResponse getDetailTransaction(TransactionDetailRequest request) {
+        LOGGER.info("accessed");
 
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
                 String.format(" %s doesn't exists", request.getUserID())
@@ -122,6 +132,7 @@ public class MutationServiceImpl implements MutationService{
 
     @Override
     public AccountMonthlyResponse getMonthlyMutation(int month, String username) {
+        LOGGER.info("accessed");
 
         LocalDate now = LocalDate.now();
         YearMonth yearMonth = YearMonth.of(now.getYear(), month);
@@ -144,11 +155,12 @@ public class MutationServiceImpl implements MutationService{
                 .findByAccountAndDate(account.getAccountNumber(),earlyMonth,endMonth);
 
         return mutationResponseMapper.toMonthlyMutation(transactions);
-
     }
 
     @Override
     public List<SimpleTransactionDetailResponse> getLastTwoCreditTransactions(LatestTransactionsRequest request) {
+        LOGGER.info("accessed");
+
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new UsernameNotFoundException(
                 String.format(" %s doesn't exists", request.getUserID())
         ));
@@ -166,6 +178,8 @@ public class MutationServiceImpl implements MutationService{
 
     @Override
     public SourceAccountResponse getSourceAccountBalance(String userID) {
+        LOGGER.info("accessed");
+
         User user = userRepository.findByUserID(userID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
         return SourceAccountResponse.builder()

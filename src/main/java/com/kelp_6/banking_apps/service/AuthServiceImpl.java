@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(AuthServiceImpl.class);
     private final UserRepository userRepository;
     private final LoginInfosRepository loginInfosRepository;
     private final ValidationService validationService;
@@ -41,6 +42,8 @@ public class AuthServiceImpl implements AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     public TokenResponse login(LoginRequest request) {
+        LOGGER.info("accessed");
+
         this.validationService.validate(request);
 
         User user = this.userRepository
@@ -79,6 +82,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginInfoResponse getLoginInfo(String userID) {
+        LOGGER.info("accessed");
+
         LoginInfos loginInfosSuccess = loginInfosRepository.findLoginSuccessByUser_UserID(userID).orElse(null);
         LoginInfos loginInfosFailed = loginInfosRepository.findLoginFailedByUser_UserID(userID).orElse(null);
 
@@ -100,6 +105,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public PinTokenResponse validatePin(PinValidationRequest pinValidationRequest) {
+        LOGGER.info("accessed");
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
         logger.info("Authenticating user with ID: {}", userId);

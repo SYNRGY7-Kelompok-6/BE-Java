@@ -8,7 +8,8 @@ import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.ScheduledTransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,8 +20,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/transfer-scheduler")
-@Slf4j
 public class ScheduledTransactionController {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ScheduledTransactionController.class);
     private final ScheduledTransactionService scheduledTransactionService;
 
     @PostMapping(
@@ -33,7 +34,7 @@ public class ScheduledTransactionController {
             @RequestHeader(value = "X-PIN-TOKEN") String pinToken,
             Authentication authentication
     ){
-        log.info("controller.transfer.schedule - ScheduledTransactionController - createSchedule - accessed");
+        LOGGER.info("accessed");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -54,7 +55,7 @@ public class ScheduledTransactionController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<List<ScheduledTransactionResponse>> getAllSchedules(Authentication authentication){
-        log.info("controller.transfer.schedule - ScheduledTransactionController - getAllSchedules - accessed");
+        LOGGER.info("accessed");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -75,7 +76,7 @@ public class ScheduledTransactionController {
             @PathVariable(value = "scheduleId") String scheduleId,
             Authentication authentication
     ){
-        log.info("controller.transfer.schedule - ScheduledTransactionController - getDetailSchedule - accessed");
+        LOGGER.info("accessed");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -99,7 +100,7 @@ public class ScheduledTransactionController {
             @RequestHeader(value = "X-PIN-TOKEN") String pinToken,
             Authentication authentication
     ){
-        log.info("controller.transfer.schedule - ScheduledTransactionController - updateSchedule - accessed");
+        LOGGER.info("accessed");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -125,7 +126,7 @@ public class ScheduledTransactionController {
             @RequestHeader(value = "X-PIN-TOKEN") String pinToken,
             Authentication authentication
     ){
-        log.info("controller.transfer.schedule - ScheduledTransactionController - cancelSchedule - accessed");
+        LOGGER.info("accessed");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 

@@ -7,6 +7,8 @@ import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.SavedAccountsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/saved-accounts")
 public class SavedAccountController {
+    private final static Logger LOGGER = LoggerFactory.getLogger(SavedAccountController.class);
     private final SavedAccountsService savedAccountsService;
 
     @PostMapping(
@@ -26,6 +29,8 @@ public class SavedAccountController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<SavedAccountsResponse> addSavedAccount(@RequestBody @Valid SavedAccountsRequest request, Authentication authentication){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         request.setUserID(userDetails.getUsername());
@@ -48,6 +53,8 @@ public class SavedAccountController {
             @RequestParam(value = "isFavorite", required = false, defaultValue = "false") Boolean isFavorite,
             Authentication authentication
             ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         SavedAccountsRequest request = SavedAccountsRequest.builder()
@@ -74,6 +81,8 @@ public class SavedAccountController {
             @PathVariable(value = "savedBeneficiaryId") String savedBeneficiaryId,
             Authentication authentication
     ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         SavedAccountsRequest request = SavedAccountsRequest.builder()
@@ -100,6 +109,8 @@ public class SavedAccountController {
             @RequestBody @Valid UpdateSavedAccountRequest request,
             Authentication authentication
     ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         request.setSavedBeneficiaryId(savedBeneficiaryId);
@@ -122,6 +133,8 @@ public class SavedAccountController {
             @PathVariable("savedBeneficiaryId") String savedBeneficiaryId,
             Authentication authentication
     ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         SavedAccountsRequest request = SavedAccountsRequest.builder()

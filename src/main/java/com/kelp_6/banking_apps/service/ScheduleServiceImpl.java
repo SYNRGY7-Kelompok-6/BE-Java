@@ -8,7 +8,8 @@ import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.repository.ScheduledTransactionRepository;
 import com.kelp_6.banking_apps.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -18,14 +19,14 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
-public class ScheduleServiceImpl implements ScheduleService{
+public class ScheduleServiceImpl implements ScheduleService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ScheduleServiceImpl.class);
     private final ScheduledTransactionRepository scheduledTransactionRepository;
     private final TransactionIntrabankService transactionIntrabankService;
 
     @Override
     public void scheduleTransferAutomation(Date currentDate) {
-        log.info("service - ScheduleServiceImpl - scheduleTransferAutomation - accessed");
+        LOGGER.info("accessed");
 
         // get list today schedule with status is pending
         List<ScheduledTransaction> allScheduleForToday = scheduledTransactionRepository.findAllScheduleForToday(EScheduleStatus.PENDING, currentDate);
@@ -59,7 +60,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     private void performTransferAutomation(ScheduledTransaction scheduledTransaction){
-        log.info("service - ScheduleServiceImpl - performTransferAutomation - accessed");
+        LOGGER.info("accessed");
+
         Amount amount = Amount.builder()
                 .value(scheduledTransaction.getAmount())
                 .currency("IDR")
@@ -77,7 +79,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     private void updateNumbersTransactions(ScheduledTransaction scheduledTransaction){
-        log.info("service - ScheduleServiceImpl - updateNumbersTransactions - accessed");
+        LOGGER.info("accessed");
+
         Integer numbersSucceedTransactions = scheduledTransaction.getNumbersSucceedTransactions();
         scheduledTransaction.setNumbersSucceedTransactions(numbersSucceedTransactions + 1);
 
@@ -87,7 +90,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     private void updateIntoNextScheduleDate(Date currentDate, ScheduledTransaction scheduledTransaction){
-        log.info("service - ScheduleServiceImpl - updateIntoNextScheduleDate - accessed");
+        LOGGER.info("accessed");
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(currentDate);
         calendar.add(Calendar.DAY_OF_MONTH, 1);

@@ -4,6 +4,8 @@ import com.kelp_6.banking_apps.entity.Transaction;
 import com.kelp_6.banking_apps.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,14 +21,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class PdfServiceImpl implements PdfService {
-
+    private final static Logger LOGGER = LoggerFactory.getLogger(PdfServiceImpl.class);
     private final TemplateEngine templateEngine;
-
     private final TransactionRepository transactionRepository;
 
     @Override
     public byte[] generatePdf(String transactionId) {
-        log.info("service - PdfServiceImpl - generatePdf - accessed");
+        LOGGER.info("accessed");
 
         UUID id = UUID.fromString(transactionId);
         Transaction transaction = transactionRepository.findById(id)

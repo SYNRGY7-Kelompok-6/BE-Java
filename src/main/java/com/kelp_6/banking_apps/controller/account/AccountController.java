@@ -5,6 +5,8 @@ import com.kelp_6.banking_apps.model.account.AvailableAccountResponse;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/accounts")
 @RequiredArgsConstructor
 public class AccountController {
+    private final static Logger LOGGER = LoggerFactory.getLogger(AccountController.class);
     private final AccountService accountService;
 
     @GetMapping(
@@ -27,6 +30,8 @@ public class AccountController {
             Authentication authentication,
             @PathVariable String accountNumber
     ){
+        LOGGER.info("accessed");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         AvailableAccountRequest request = new AvailableAccountRequest();

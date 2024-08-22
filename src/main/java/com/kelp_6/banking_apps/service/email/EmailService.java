@@ -1,15 +1,15 @@
 package com.kelp_6.banking_apps.service.email;
 
-
 import com.kelp_6.banking_apps.model.email.EmailModel;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -28,6 +28,8 @@ import java.util.Locale;
 @Service
 @Slf4j
 public class EmailService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
+
     @Autowired
     private JavaMailSenderImpl mailSender;
 
@@ -36,6 +38,8 @@ public class EmailService {
 
     @Async
     public void notificationIncomingFunds(EmailModel data) throws MessagingException, IOException {
+        LOGGER.info("accessed");
+
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY");
 
@@ -71,6 +75,8 @@ public class EmailService {
 
 
     private String readFileHtmlTemplate() throws IOException {
+        LOGGER.info("accessed");
+
         Resource resource = resourceLoader.getResource("classpath:templates/email.html");
         Path path = Paths.get(resource.getURI());
         return Files.readString(path, StandardCharsets.UTF_8);
