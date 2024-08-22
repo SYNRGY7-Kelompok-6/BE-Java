@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -72,16 +73,16 @@ public class UserServiceImpl implements UserService{
             }
         }
 
-        if(request.getEmail() != null && userRepository.existsByUsername(request.getEmail())){
+        if(request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getUsername()) && userRepository.existsByUsername(request.getEmail())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email already exists");
         }
 
         user.setImageUrl(imageUrl);
-        user.setName((request.getName() == null) ? user.getName() : request.getName());
-        user.setUsername((request.getEmail() == null) ? user.getUsername() : request.getEmail());
-        user.setPhone((request.getPhone() == null) ? user.getPhone() : request.getPhone());
+        user.setName((!StringUtils.hasText(request.getName())) ? user.getName() : request.getName());
+        user.setUsername((!StringUtils.hasText(request.getEmail())) ? user.getUsername() : request.getEmail());
+        user.setPhone((!StringUtils.hasText(request.getPhone())) ? user.getPhone() : request.getPhone());
         user.setBirth((request.getBirth() == null) ? user.getBirth() : request.getBirth());
-        user.setAddress((request.getAddress() == null) ? user.getAddress() : request.getAddress());
+        user.setAddress((!StringUtils.hasText(request.getAddress())) ? user.getAddress() : request.getAddress());
 
         userRepository.save(user);
 
