@@ -7,7 +7,8 @@ import com.kelp_6.banking_apps.model.user.ProfileInfoRequest;
 import com.kelp_6.banking_apps.model.user.ProfileInfoResponse;
 import com.kelp_6.banking_apps.model.user.UpdateProfileInfoRequest;
 import com.kelp_6.banking_apps.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService{
-
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final Cloudinary cloudinary;
     private final SimpleDateFormat formatter;
@@ -41,6 +42,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public ProfileInfoResponse getProfile(ProfileInfoRequest request) {
+        LOGGER.info("accessed");
+
         User user = userRepository.findByUserID(request.getUserID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
         return ProfileInfoResponse.builder()
@@ -56,10 +59,12 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public ProfileInfoResponse updateProfile(UpdateProfileInfoRequest request, MultipartFile file, String userID) {
+        LOGGER.info("accessed");
+
         User user = userRepository.findByUserID(userID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
 
         String imageUrl = user.getImageUrl();
-        if(file != null){
+        if (file != null) {
             // Validate the content type
             String contentType = file.getContentType();
             if (contentType == null || !isImage(contentType)) {
@@ -73,7 +78,7 @@ public class UserServiceImpl implements UserService{
             }
         }
 
-        if(request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getUsername()) && userRepository.existsByUsername(request.getEmail())){
+        if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getUsername()) && userRepository.existsByUsername(request.getEmail())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email already exists");
         }
 
@@ -97,6 +102,8 @@ public class UserServiceImpl implements UserService{
     }
 
     private boolean isImage(String contentType) {
+        LOGGER.info("accessed");
+
         return contentType.equals("image/png") ||
                 contentType.equals("image/jpeg") ||
                 contentType.equals("image/jpg") ||

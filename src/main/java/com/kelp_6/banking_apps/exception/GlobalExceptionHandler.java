@@ -5,8 +5,9 @@ import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.utils.StringsUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -27,12 +28,13 @@ import java.security.SignatureException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private final static Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(value = { ConstraintViolationException.class })
     public ResponseEntity<WebResponse<Object>> constraintViolationException(ConstraintViolationException exception) {
-        log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -46,7 +48,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<WebResponse<Object>> methodArgumentNotValidException(MethodArgumentNotValidException exception){
-        log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         // Extract field errors
         List<String> errorMessages = exception.getBindingResult()
@@ -70,6 +72,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<WebResponse<Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        LOGGER.error("{}", exception.getMessage());
         String errorMessage = "Invalid input. Please check your data and try again.";
 
         Throwable cause = exception.getCause();
@@ -94,7 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<WebResponse<Object>> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception){
-        log.info("[ {} ] {}", HttpStatus.BAD_REQUEST, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse.builder()
                 .status("BAD REQUEST")
@@ -117,6 +120,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<WebResponse<Object>> handleMissingRequestHeader(MissingRequestHeaderException ex) {
+        LOGGER.error("{}", ex.getMessage());
+
         WebResponse<Object> response = WebResponse.<Object>builder()
                 .status("error")
                 .message("Required header is missing: " + ex.getHeaderName())
@@ -128,7 +133,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { BadCredentialsException.class })
     public ResponseEntity<WebResponse<Object>> badCredentialsException(BadCredentialsException exception) {
-        log.info("[ {} ] {}", HttpStatus.UNAUTHORIZED, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -142,7 +147,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { UsernameNotFoundException.class })
     public ResponseEntity<WebResponse<Object>> usernameNotFoundException(UsernameNotFoundException exception){
-        log.info("[ {} ] {}", HttpStatus.NOT_FOUND, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -156,6 +161,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { AccessDeniedException.class })
     public ResponseEntity<WebResponse<Object>> accessDeniedException(AccessDeniedException exception) {
+        LOGGER.error("{}", exception.getMessage());
+
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
                 .status("FORBIDDEN")
@@ -168,7 +175,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { ExpiredJwtException.class })
     public ResponseEntity<WebResponse<Object>> expiredJwtException(ExpiredJwtException exception) {
-        log.info("[ {} ] {}", HttpStatus.UNAUTHORIZED, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -182,7 +189,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { SignatureException.class })
     public ResponseEntity<WebResponse<Object>> signatureException(SignatureException exception) {
-        log.info("[ {} ] {}", HttpStatus.UNAUTHORIZED, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -196,7 +203,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { ResponseStatusException.class })
     public ResponseEntity<WebResponse<Object>> applicationException(ResponseStatusException exception) {
-        log.info("[ {} ] {}", exception.getStatusCode(), exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -210,7 +217,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { NoResourceFoundException.class })
     public ResponseEntity<WebResponse<Object>> resourceNotFoundException(NoResourceFoundException exception) {
-        log.info("[ {} ] {}", HttpStatus.NOT_FOUND, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
@@ -224,7 +231,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { Exception.class })
     public ResponseEntity<WebResponse<Object>> allException(Exception exception) {
-        log.info("[ {} ] {}", HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+        LOGGER.error("{}", exception.getMessage());
 
         // Get the cause if it exists
         Throwable cause = exception.getCause();

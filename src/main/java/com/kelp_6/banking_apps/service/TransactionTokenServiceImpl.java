@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import java.util.function.Function;
 @Service
 @RequiredArgsConstructor
 public class TransactionTokenServiceImpl implements TransactionTokenService {
+    private final static Logger LOGGER = LoggerFactory.getLogger(TransactionTokenServiceImpl.class);
+
     @Value("${security.jwt.transaction-secret-key}")
     private String TRANSACTION_SECRET_KEY;
 
@@ -21,6 +25,8 @@ public class TransactionTokenServiceImpl implements TransactionTokenService {
     private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
     public String generateTransactionToken(String accountNumber) {
+        LOGGER.info("accessed");
+
         return Jwts.builder()
                 .setSubject(accountNumber)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -30,6 +36,8 @@ public class TransactionTokenServiceImpl implements TransactionTokenService {
     }
 
     public boolean validateTransactionToken(String token, String accountNumber) {
+        LOGGER.info("accessed");
+
         final String accountNumberFromToken = this.extractAccountNumber(token);
         return (accountNumber.equals(accountNumberFromToken) && !this.isTransactionTokenExpired(token));
     }
