@@ -41,6 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     "/api/v1.0/auth/login",
                     "/api/v1.0/ping",
                     "/api/v1.0/financial-calculator",
+                    "/api/v1.0/logs/latest",
                     "/api/v1.0",
                     "/api/v1.0/swagger-ui/index.html")
     );

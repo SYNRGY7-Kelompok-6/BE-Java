@@ -187,19 +187,34 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(value = { SignatureException.class })
-    public ResponseEntity<WebResponse<Object>> signatureException(SignatureException exception) {
-        LOGGER.error("{}", exception.getMessage());
+    @ExceptionHandler(value = { java.security.SignatureException.class })
+    public ResponseEntity<WebResponse<Object>> handleJavaSecuritySignatureException(java.security.SignatureException exception) {
+        LOGGER.error("Security Signature Exception: {}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
                 .status(HttpStatus.UNAUTHORIZED.toString())
-                .message("invalid credentials")
+                .message("Invalid credentials")
                 .data(null)
                 .build();
 
         return new ResponseEntity<>(errResponse, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(value = { io.jsonwebtoken.security.SignatureException.class })
+    public ResponseEntity<WebResponse<Object>> handleJwtSignatureException(io.jsonwebtoken.security.SignatureException exception) {
+        LOGGER.error("JWT Signature Exception: {}", exception.getMessage());
+
+        WebResponse<Object> errResponse = WebResponse
+                .<Object>builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .message("Invalid credentials")
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(errResponse, HttpStatus.UNAUTHORIZED);
+    }
+
 
     @ExceptionHandler(value = { ResponseStatusException.class })
     public ResponseEntity<WebResponse<Object>> applicationException(ResponseStatusException exception) {
@@ -231,7 +246,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = { Exception.class })
     public ResponseEntity<WebResponse<Object>> allException(Exception exception) {
-        LOGGER.error("{}", exception.getMessage());
+        // Log the name of the exception class
+        String exceptionName = exception.getClass().getName();
+        LOGGER.error("Exception Name: {}", exceptionName);
+        LOGGER.info("{}", exception.getMessage());
 
         // Get the cause if it exists
         Throwable cause = exception.getCause();
