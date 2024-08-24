@@ -51,10 +51,12 @@ public class UserController {
             @RequestParam(value = "image", required = false) MultipartFile file,
             Authentication authentication
     ){
-        LOGGER.info("profile pict - is empty? - {}", file.isEmpty());
-        LOGGER.info("profile pict - filetype - {}", file.getContentType());
-        LOGGER.info("profile pict - size - {} bytessc", file.getSize());
-        LOGGER.info("profile pict - original file name - {}", file.getOriginalFilename());
+        if (file != null) {
+            LOGGER.info("profile pict - is empty? - {}", file.isEmpty());
+            LOGGER.info("profile pict - filetype - {}", file.getContentType());
+            LOGGER.info("profile pict - size - {} bytessc", file.getSize());
+            LOGGER.info("profile pict - original file name - {}", file.getOriginalFilename());
+        }
 
         LOGGER.info("accessed");
 
