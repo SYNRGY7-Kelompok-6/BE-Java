@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Amount {
     @NotNull(message = "amount can't be null")
-    @DecimalMin(value = "100.0", inclusive = false, message = "amount must be greater than 100.0")
+    @DecimalMin(value = "99.9", inclusive = false, message = "amount must be greater than 100.0")
     private Double value;
 
     @NotBlank(message = "currency can't be blank")
