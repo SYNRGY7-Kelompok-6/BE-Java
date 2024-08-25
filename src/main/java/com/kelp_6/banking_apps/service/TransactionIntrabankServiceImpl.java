@@ -58,6 +58,10 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         Account srcAccount = accountRepository.findByUser(user.getId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "source account number doesn't exists"));
+        if(!isSchedule && (request.getPinToken() == null || !request.getPinToken().isEmpty())){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
+        }
+
         if (!isSchedule && !this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
