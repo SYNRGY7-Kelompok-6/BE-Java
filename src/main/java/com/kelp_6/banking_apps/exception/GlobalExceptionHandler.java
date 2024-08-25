@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.kelp_6.banking_apps.model.web.WebResponse;
 import com.kelp_6.banking_apps.utils.StringsUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.io.DecodingException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -38,7 +40,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("BAD REQUEST")
+                .status(HttpStatus.BAD_REQUEST.toString())
                 .message(exception.getMessage())
                 .data(null)
                 .build();
@@ -62,7 +64,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("BAD REQUEST")
+                .status(HttpStatus.BAD_REQUEST.toString())
                 .message(formattedErrorMessage)
                 .data(null)
                 .build();
@@ -87,7 +89,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("BAD REQUEST")
+                .status(HttpStatus.BAD_REQUEST.toString())
                 .message(errorMessage)
                 .data(null)
                 .build();
@@ -100,7 +102,7 @@ public class GlobalExceptionHandler {
         LOGGER.error("{}", exception.getMessage());
 
         WebResponse<Object> errResponse = WebResponse.builder()
-                .status("BAD REQUEST")
+                .status(HttpStatus.BAD_REQUEST.toString())
                 .message("invalid value: " + exception.getValue())
                 .data(null)
                 .build();
@@ -110,7 +112,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({FileSizeLimitExceededException.class, MaxUploadSizeExceededException.class})
     public ResponseEntity<WebResponse<Object>> fileSizeLimitExceededException(FileSizeLimitExceededException exception){
         WebResponse<Object> response = WebResponse.<Object>builder()
-                .status("error")
+                .status(HttpStatus.PAYLOAD_TOO_LARGE.toString())
                 .message("The file size exceeds the maximum allowed limit!")
                 .data(null)
                 .build();
@@ -118,12 +120,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<WebResponse<Object>> missingServletRequestParameterException(MissingServletRequestParameterException exception){
+        LOGGER.error("{}", exception.getMessage());
+
+        WebResponse<Object> response = WebResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .message("Required parameter is missing: " + exception.getParameterName())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<WebResponse<Object>> handleMissingRequestHeader(MissingRequestHeaderException ex) {
         LOGGER.error("{}", ex.getMessage());
 
         WebResponse<Object> response = WebResponse.<Object>builder()
-                .status("error")
+                .status(HttpStatus.BAD_REQUEST.toString())
                 .message("Required header is missing: " + ex.getHeaderName())
                 .data(null)
                 .build();
@@ -137,7 +151,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("UNAUTHORIZED")
+                .status(HttpStatus.UNAUTHORIZED.toString())
                 .message("bad credentials")
                 .data(null)
                 .build();
@@ -151,7 +165,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("NOT FOUND")
+                .status(HttpStatus.NOT_FOUND.toString())
                 .message("user not found")
                 .data(null)
                 .build();
@@ -165,7 +179,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("FORBIDDEN")
+                .status(HttpStatus.FORBIDDEN.toString())
                 .message("unauthorized user")
                 .data(null)
                 .build();
@@ -179,7 +193,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("UNAUTHORIZED")
+                .status(HttpStatus.UNAUTHORIZED.toString())
                 .message("expired credentials")
                 .data(null)
                 .build();
@@ -215,6 +229,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(io.jsonwebtoken.io.DecodingException.class)
+    public ResponseEntity<WebResponse<Object>> decodingException(DecodingException exception){
+        LOGGER.error("{}", exception.getMessage());
+
+        WebResponse<Object> response = WebResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .message("invalid token")
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(value = { ResponseStatusException.class })
     public ResponseEntity<WebResponse<Object>> applicationException(ResponseStatusException exception) {
@@ -222,7 +248,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status(exception.getStatusCode().toString().substring(4))
+                .status(exception.getStatusCode().toString())
                 .message(exception.getReason())
                 .data(null)
                 .build();
@@ -236,7 +262,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("NOT FOUND")
+                .status(HttpStatus.NOT_FOUND.toString())
                 .message("resource not found")
                 .data(null)
                 .build();
@@ -257,7 +283,7 @@ public class GlobalExceptionHandler {
 
         WebResponse<Object> errResponse = WebResponse
                 .<Object>builder()
-                .status("INTERNAL SERVER ERROR")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
                 .message(causeMessage)
                 .data(null)
                 .build();
