@@ -33,6 +33,10 @@ public class TransactionController {
             @RequestHeader("X-PIN-TOKEN") String pinToken,
             @RequestBody @Valid TransferRequest request) {
         LOGGER.info("accessed");
+        LOGGER.info("request ben-account-number : {}", request.getBeneficiaryAccountNumber());
+        LOGGER.info("request remark : {}", request.getRemark());
+        LOGGER.info("request description : {}", request.getDesc());
+        LOGGER.info("request amount : {}", (request.getAmount() != null) ? request.getAmount().getValue() : null);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         request.setUserID(userDetails.getUsername());
