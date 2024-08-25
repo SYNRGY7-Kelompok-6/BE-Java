@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -42,6 +43,20 @@ public class GlobalExceptionHandler {
                 .<Object>builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .message(exception.getMessage())
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(errResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<WebResponse<Object>> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException exception){
+        LOGGER.error("{}", exception.getMessage());
+
+        WebResponse<Object> errResponse = WebResponse
+                .<Object>builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .message("invalid Content-Type")
                 .data(null)
                 .build();
 
