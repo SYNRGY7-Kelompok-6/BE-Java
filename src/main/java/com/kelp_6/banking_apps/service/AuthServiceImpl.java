@@ -13,6 +13,7 @@ import com.kelp_6.banking_apps.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -46,9 +47,25 @@ public class AuthServiceImpl implements AuthService {
 
         this.validationService.validate(request);
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
+        calendar.setTime(new Date());
+
         User user = this.userRepository
                 .findByUserID(request.getUserID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user not found"));
+                .orElseThrow(() -> new BadCredentialsException("invalid credentials"));
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            LoginInfos loginInfos = LoginInfos.builder()
+                    .user(user)
+                    .ipAddress(request.getIpAddress())
+                    .timestamp(calendar.getTime())
+                    .isSuccess(false)
+                    .location("Bekasi, Indonesia")
+                    .build();
+            loginInfosRepository.save(loginInfos);
+            throw new BadCredentialsException("invalid credentials");
+        }
+
         this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getUserID(),
                 request.getPassword()
@@ -60,10 +77,6 @@ public class AuthServiceImpl implements AuthService {
                 .authorities("USER")
                 .build();
         String token = this.jwtUtil.generateToken(userDetails);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
-        calendar.setTime(new Date());
 
         LoginInfos loginInfos = LoginInfos.builder()
                 .user(user)
