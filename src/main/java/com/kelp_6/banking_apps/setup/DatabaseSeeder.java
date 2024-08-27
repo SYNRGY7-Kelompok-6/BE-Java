@@ -169,7 +169,7 @@ public class DatabaseSeeder {
 
             Account account = Account.builder()
                     .accountNumber(listAccountNumber.get(counter))
-                    .availableBalance((double) (Generator.numberRangeGenerator(500, 1000) * 1000))
+                    .availableBalance((double) (Generator.numberRangeGenerator(500, 5000) * 1000))
                     .availableBalanceCurr("IDR")
                     .holdAmount(50000D)
                     .holdAmountCurr("IDR")

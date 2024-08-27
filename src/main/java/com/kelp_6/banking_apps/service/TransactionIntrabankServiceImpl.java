@@ -1,17 +1,11 @@
 package com.kelp_6.banking_apps.service;
 
-import com.kelp_6.banking_apps.entity.Account;
-import com.kelp_6.banking_apps.entity.ETransactionType;
-import com.kelp_6.banking_apps.entity.Transaction;
-import com.kelp_6.banking_apps.entity.User;
+import com.kelp_6.banking_apps.entity.*;
 import com.kelp_6.banking_apps.model.email.EmailModel;
 import com.kelp_6.banking_apps.model.transfer.intrabank.Amount;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferRequest;
 import com.kelp_6.banking_apps.model.transfer.intrabank.TransferResponse;
-import com.kelp_6.banking_apps.repository.AccountRepository;
-import com.kelp_6.banking_apps.repository.SavedAccountsRespository;
-import com.kelp_6.banking_apps.repository.TransactionRepository;
-import com.kelp_6.banking_apps.repository.UserRepository;
+import com.kelp_6.banking_apps.repository.*;
 import com.kelp_6.banking_apps.service.email.EmailService;
 import com.kelp_6.banking_apps.utils.CurrencyUtil;
 import com.kelp_6.banking_apps.utils.Generator;
@@ -25,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.Date;
 
 @Service
@@ -38,6 +33,7 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
     private final TransactionRepository transactionRepository;
     private final ValidationService validationService;
     private final TransactionTokenService transactionTokenService;
+    private final BlacklistedUserPinTokenRepository blacklistedUserPinTokenRepository;
 
     @Autowired
     private EmailService emailService;
@@ -62,7 +58,8 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
 
-        if (!isSchedule && !this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber())) {
+        boolean pinTokenChecker = !isSchedule && (!this.transactionTokenService.validateTransactionToken(request.getPinToken(), srcAccount.getAccountNumber()) || this.blacklistedUserPinTokenRepository.existsByUser_IdAndPinToken(user.getId(), request.getPinToken()));
+        if (pinTokenChecker) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid pin credential");
         }
         if (request.getBeneficiaryAccountNumber().equals(srcAccount.getAccountNumber())) {
@@ -131,7 +128,6 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .account(srcAccount)
                 .type(ETransactionType.DEBIT)
                 .build();
-        this.transactionRepository.save(srcAccountTransaction);
         // beneficiary account transaction record
         Transaction benAccountTransaction = Transaction.builder()
                 .refNumber(Generator.refNumberGenerator(transactionDate))
@@ -147,12 +143,11 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
                 .account(benAccount)
                 .type(ETransactionType.CREDIT)
                 .build();
-        this.transactionRepository.save(benAccountTransaction);
+        this.transactionRepository.saveAll(Arrays.asList(srcAccountTransaction, benAccountTransaction));
 
         srcAccount.setAvailableBalance(srcAccRemainingBalance);
-        this.accountRepository.save(srcAccount);
         benAccount.setAvailableBalance(benAccRemainingBalance);
-        this.accountRepository.save(benAccount);
+        this.accountRepository.saveAll(Arrays.asList(srcAccount, benAccount));
 
         EmailModel emailData = EmailModel.builder()
                 .beneficiaryAccount(benAccount.getAccountNumber())
@@ -169,6 +164,12 @@ public class TransactionIntrabankServiceImpl implements TransactionIntrabankServ
         }catch (Exception exception){
             LOGGER.error("Failed to send email notification to {}: {}", benAccount.getUser().getUsername(), exception.getMessage(), exception);
         }
+
+        BlacklistedUserPinToken blacklistedUserPinToken = BlacklistedUserPinToken.builder()
+                .user(user)
+                .pinToken(request.getPinToken())
+                .build();
+        blacklistedUserPinTokenRepository.save(blacklistedUserPinToken);
 
         return TransferResponse.builder()
                 .refNumber(srcAccountTransaction.getRefNumber())
