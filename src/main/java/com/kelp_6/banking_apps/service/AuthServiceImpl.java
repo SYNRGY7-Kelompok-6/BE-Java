@@ -13,6 +13,7 @@ import com.kelp_6.banking_apps.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = this.userRepository
                 .findByUserID(request.getUserID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user not found"));
+                .orElseThrow(() -> new BadCredentialsException("invalid credentials"));
         this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getUserID(),
                 request.getPassword()

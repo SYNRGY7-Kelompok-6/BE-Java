@@ -1,5 +1,6 @@
 package com.kelp_6.banking_apps.security.config;
 
+import com.kelp_6.banking_apps.security.filter.CustomAuthenticationFailureHandler;
 import com.kelp_6.banking_apps.security.filter.JwtRequestFilter;
 import com.kelp_6.banking_apps.service.UserDetailsServiceImpl;
 import jakarta.servlet.DispatcherType;
@@ -30,6 +31,7 @@ public class WebSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtRequestFilter jwtRequestFilter;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     public static String[] SWAGGER_URL_PATHS = new String[] {
             "/swagger-ui/index.html",
@@ -73,6 +75,10 @@ public class WebSecurityConfig {
                                 .requestMatchers("/auth/login", "/ping", "/financial-calculator", "/logs/latest").permitAll()
                                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                                 .anyRequest().authenticated())
+                .formLogin(login -> login
+                        .loginProcessingUrl("/auth/login")
+                        .failureHandler(customAuthenticationFailureHandler)
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(this.jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
