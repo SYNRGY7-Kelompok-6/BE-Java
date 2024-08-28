@@ -152,7 +152,7 @@ public class MutationResponseMapper {
     }
     public SimpleTransactionDetailResponse toSimpleTransactionDetailDTO(User user, Transaction transaction) {
         return SimpleTransactionDetailResponse.builder()
-                .sourceName(user.getName())
+                .sourceName(transaction.getBeneficiaryName())
                 .amount(transaction.getAmount())
                 .transactionDate(formatter.format(transaction.getTransactionDate()))
                 .build();
